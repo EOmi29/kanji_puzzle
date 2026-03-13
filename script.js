@@ -36,7 +36,6 @@ function addKanjiSection() {
     document.getElementById("kanji-container").style.display = "block";
     document.getElementById("start-button").style.display = "inline-block";
 
-    // 既に同じ学年・学期が追加されていないかチェック
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
     if (document.getElementById(existingId)) {
         alert("その学年・学期はもう追加されているよ！");
@@ -49,30 +48,31 @@ function addKanjiSection() {
         return;
     }
 
-    // セクション作成
     const section = document.createElement("div");
     section.id = existingId;
     
-    // 見出し
     const heading = document.createElement("div");
     heading.className = "term-heading";
     heading.innerHTML = `<span>＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞</span>`;
     
-    // このセクション用の「ぜんぶえらぶ」ボタン
     const allBtn = document.createElement("button");
     allBtn.textContent = "この学期をぜんぶえらぶ";
     allBtn.style.fontSize = "12px";
     allBtn.style.padding = "5px 10px";
     allBtn.style.background = "#81D4FA";
     
-    // 漢字ボタンの並び
     const row = document.createElement("div");
     row.className = "kanji-list-row";
+
+    // --- ここから修正 ---
+    // このセクション内のボタンをまとめて管理するための配列
+    const sectionButtons = [];
 
     filtered.forEach(k => {
         const btn = document.createElement("button");
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
+        
         btn.onclick = () => {
             btn.classList.toggle("selected");
             if (selectedKanji.includes(k)) {
@@ -81,16 +81,23 @@ function addKanjiSection() {
                 selectedKanji.push(k);
             }
         };
+        
         row.appendChild(btn);
-
-        // 「ぜんぶえらぶ」クリック時の処理を定義
-        allBtn.onclick = () => {
-            if (!btn.classList.contains("selected")) {
-                btn.classList.add("selected");
-                selectedKanji.push(k);
-            }
-        };
+        // 配列に保存しておく
+        sectionButtons.push({ element: btn, data: k });
     });
+
+    // ぜんぶえらぶボタンのクリックイベントを「1回だけ」設定
+    allBtn.onclick = () => {
+        sectionButtons.forEach(item => {
+            // まだ選択されていない場合だけクリック処理を行う
+            if (!item.element.classList.contains("selected")) {
+                item.element.classList.add("selected");
+                selectedKanji.push(item.data);
+            }
+        });
+    };
+    // --- 修正ここまで ---
 
     heading.appendChild(allBtn);
     section.appendChild(heading);
