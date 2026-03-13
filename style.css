@@ -3,73 +3,81 @@ body {
     background: #FFF7E8;
     text-align: center;
     margin: 0;
-    user-select: none; /* テキスト選択を防ぐ */
+    user-select: none;
+    touch-action: pan-y; /* ドラッグ中のブラウザスクロールを防止 */
 }
 
-.title { margin-top: 20px; color: #444; }
-.description { margin-bottom: 30px; }
-.select-block { margin: 20px; }
-
-/* 元の使いやすいボタンデザインへ */
-button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 10px;
-    background: #FFD59E;
-    font-size: 16px;
-    cursor: pointer;
-}
-button:hover { background: #FFC36B; }
-.active { background: #FFB74D; font-weight: bold; }
-
-#kanji-list {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 10px; max-width: 800px; margin: auto;
-}
-
-.kanji-btn {
-    font-size: 28px; width: 60px; height: 60px;
-    display: flex; align-items: center; justify-content: center;
-    background: white; border: 2px solid #FFD59E; border-radius: 10px;
-}
-.kanji-btn.selected { background: #FFD59E; }
-
-/* レイアウト */
+/* 全体レイアウトを少し小さく */
 #main-puzzle-layout {
-    display: flex; justify-content: center; align-items: center;
-    gap: 30px; margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* 間隔を狭める */
+    margin: 10px auto;
+    max-width: 95vw;
 }
-.vertical-text {
-    writing-mode: vertical-rl; text-orientation: upright;
-    font-weight: bold; min-width: 60px; height: 720px;
-    display: flex; align-items: center; justify-content: center;
-}
-#reading { font-size: 40px; color: #d35400; }
-#words { font-size: 24px; color: #555; }
 
-#grid-container { position: relative; width: 720px; height: 720px; }
-#grid {
-    width: 720px; height: 720px; display: grid; gap: 10px;
-    background: #FFD59E; padding: 10px; border-radius: 30px; box-sizing: border-box;
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-weight: bold;
+    min-width: 40px;
+    height: 450px; /* グリッドに合わせて高さを抑える */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.grid-cell { background: white; border-radius: 20px; }
+#reading { font-size: 32px; color: #d35400; }
+#words { font-size: 20px; color: #555; }
+
+/* グリッドコンテナを500pxベースに縮小 */
+#grid-container {
+    position: relative;
+    width: 450px; 
+    height: 450px;
+}
+
+#grid {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    gap: 8px;
+    background: #FFD59E;
+    padding: 8px;
+    border-radius: 20px;
+    box-sizing: border-box;
+}
 
 #correct-circle {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    border: 20px solid red; border-radius: 50%; display: none;
-    pointer-events: none; z-index: 200; box-sizing: border-box;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 15px solid red;
+    border-radius: 50%;
+    display: none;
+    pointer-events: none;
+    z-index: 200;
+    box-sizing: border-box;
 }
 
+/* パーツエリアもタブレットで見やすいサイズに */
 #parts-container {
-    width: 1100px; min-height: 250px; margin: auto;
-    border: 6px dashed #FFD59E; border-radius: 30px;
-    padding: 20px; background: #FFF3D8;
+    width: 90%;
+    max-width: 600px;
+    min-height: 120px;
+    margin: 10px auto;
+    border: 4px dashed #FFD59E;
+    border-radius: 20px;
+    padding: 15px;
+    background: #FFF3D8;
 }
-#parts-area { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
 
-.piece { touch-action: none; cursor: pointer; position: relative; z-index: 10; }
-.piece-small { transform: scale(0.4); }
+.piece {
+    touch-action: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* パーツのスケール調整 */
+.piece-small { transform: scale(0.6); }
 .piece-large { transform: scale(1); }
-
-#next-button { margin: 20px; background: #FFB74D; font-size: 20px; padding: 15px 30px; }
