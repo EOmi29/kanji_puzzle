@@ -11,21 +11,26 @@
 <div id="home-screen">
     <h1 class="title">漢字パズル</h1>
     <p class="description">漢字を正しい位置において完成させよう</p>
+
     <div class="select-block">
-        <label>漢字をえらぶ</label>
+        <label>かんじをえらぶ</label>
         <div id="kanji-list"></div>
     </div>
+
     <div class="select-block">
-        <label>分割数</label>
+        <label>マス</label>
         <button class="split-btn active" data-size="2">4マス</button>
         <button class="split-btn" data-size="3">9マス</button>
     </div>
+
     <div class="select-block">
-        <label>問題数</label>
+        <label>もんだいすう</label>
         <button class="count-btn active">5</button>
         <button class="count-btn">10</button>
+        <button class="count-btn">15</button>
     </div>
-    <button id="start-button" style="background:#FFB74D;">もんだいをだす</button>
+
+    <button id="start-button">もんだいをだす</button>
 </div>
 
 <div id="puzzle-screen" style="display:none">
@@ -33,23 +38,19 @@
     
     <div id="main-puzzle-layout">
         <div id="words" class="vertical-text"></div>
-        
         <div id="grid-container">
             <div id="grid"></div>
             <div id="correct-circle"></div>
         </div>
-
         <div id="reading" class="vertical-text"></div>
     </div>
 
     <div id="parts-container">
-        <div class="parts-title">パーツをドラッグして上の枠に入れよう</div>
+        <div class="parts-title">ここからパーツを動かそう</div>
         <div id="parts-area"></div>
     </div>
 
-    <div id="footer-area">
-        <button id="next-button" style="display:none">つぎのもんだいへ</button>
-    </div>
+    <button id="next-button" style="display:none">つぎのもんだい</button>
 </div>
 
 <script src="script.js"></script>
