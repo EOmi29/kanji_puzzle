@@ -10,20 +10,14 @@ let selectedKanji = [];
 let questionList = [];
 let currentQuestion = 0;
 
-const home = document.getElementById("home-screen");
-const puzzle = document.getElementById("puzzle-screen");
 const grid = document.getElementById("grid");
 const partsArea = document.getElementById("parts-area");
 const circle = document.getElementById("correct-circle");
 const readingDiv = document.getElementById("reading");
 const wordsDiv = document.getElementById("words");
 const nextBtn = document.getElementById("next-button");
-const kanjiList = document.getElementById("kanji-list");
 
-const canvasSize = 720;
-const gridCells = [];
-
-// 漢字選択ボタンの生成
+// 初期化（漢字リスト）
 kanjiData.forEach(k => {
     const btn = document.createElement("button");
     btn.className = "kanji-btn";
@@ -36,10 +30,10 @@ kanjiData.forEach(k => {
             selectedKanji.push(k);
         }
     };
-    kanjiList.appendChild(btn);
+    document.getElementById("kanji-list").appendChild(btn);
 });
 
-// 設定ボタンのイベント
+// ボタンイベント設定
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
@@ -56,75 +50,63 @@ document.querySelectorAll(".count-btn").forEach(btn => {
     };
 });
 
-// 開始ボタン
 document.getElementById("start-button").onclick = () => {
-    if (selectedKanji.length === 0) {
-        alert("漢字をえらんでね！");
-        return;
-    }
-    questionList = [...selectedKanji];
-    questionList.sort(() => Math.random() - 0.5);
-    questionList = questionList.slice(0, questionCount);
-    
-    home.style.display = "none";
-    puzzle.style.display = "block";
-    currentQuestion = 0;
+    if(selectedKanji.length === 0) return alert("漢字を選んでください");
+    questionList = [...selectedKanji].sort(() => Math.random() - 0.5).slice(0, questionCount);
+    document.getElementById("home-screen").style.display = "none";
+    document.getElementById("puzzle-screen").style.display = "block";
     loadQuestion();
 };
 
 function createGrid() {
-    gridCells.length = 0;
     grid.innerHTML = "";
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-    grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
-
+    const cells = [];
     for (let i = 0; i < gridSize * gridSize; i++) {
         const cell = document.createElement("div");
         cell.className = "grid-cell";
         grid.appendChild(cell);
-        gridCells.push(cell);
+        cells.push(cell);
     }
+    return cells;
 }
 
 function splitKanji(kanji) {
+    const size = 720 / gridSize;
+    const pieces = [];
     const base = document.createElement("canvas");
-    base.width = canvasSize;
-    base.height = canvasSize;
+    base.width = 720; base.height = 720;
     const ctx = base.getContext("2d");
-
-    ctx.fillStyle = "black";
     ctx.font = "600px 'Noto Sans JP'";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(kanji, canvasSize / 2, canvasSize / 2);
-
-    const size = canvasSize / gridSize;
-    const pieces = [];
+    ctx.fillText(kanji, 360, 360);
 
     for (let y = 0; y < gridSize; y++) {
         for (let x = 0; x < gridSize; x++) {
             const part = document.createElement("canvas");
-            part.width = size;
-            part.height = size;
-            const pctx = part.getContext("2d");
-            pctx.drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
-
-            pieces.push({
-                canvas: part,
-                correctIndex: y * gridSize + x
-            });
+            part.width = size; part.height = size;
+            part.getContext("2d").drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
+            pieces.push({ canvas: part, correctIndex: y * gridSize + x });
         }
     }
     return pieces;
 }
 
-function createPieces(pieces) {
-    partsArea.innerHTML = ""; // クリア
-    pieces.sort(() => Math.random() - 0.5);
+let gridCells = [];
 
-    pieces.forEach(p => {
+function loadQuestion() {
+    circle.style.display = "none";
+    readingDiv.textContent = "";
+    wordsDiv.textContent = "";
+    nextBtn.style.display = "none";
+    gridCells = createGrid();
+    const pieces = splitKanji(questionList[currentQuestion].kanji);
+    
+    partsArea.innerHTML = "";
+    pieces.sort(() => Math.random() - 0.5).forEach(p => {
         const cvs = p.canvas;
-        cvs.classList.add("piece", "piece-small");
+        cvs.className = "piece piece-small";
         cvs.puzzleData = p;
         cvs.dropIndex = undefined;
         partsArea.appendChild(cvs);
@@ -138,16 +120,12 @@ function enableDrag(el) {
 
     el.addEventListener("pointerdown", e => {
         dragging = true;
-        el.style.zIndex = 1000;
-        // 要素の左上からのマウス位置を保持
+        el.setPointerCapture(e.pointerId);
         const rect = el.getBoundingClientRect();
         startX = e.clientX - rect.left;
         startY = e.clientY - rect.top;
-        
         el.style.position = "fixed";
-        el.style.left = (e.clientX - startX) + "px";
-        el.style.top = (e.clientY - startY) + "px";
-        el.setPointerCapture(e.pointerId);
+        el.style.zIndex = 1000;
     });
 
     el.addEventListener("pointermove", e => {
@@ -165,53 +143,36 @@ function enableDrag(el) {
 }
 
 function snap(el) {
-    let bestIndex = -1;
-    let minDistance = 150; // 吸着する距離
-
     const elRect = el.getBoundingClientRect();
-    const elCenter = {
-        x: elRect.left + elRect.width / 2,
-        y: elRect.top + elRect.height / 2
-    };
+    const elCenter = { x: elRect.left + elRect.width / 2, y: elRect.top + elRect.height / 2 };
+    
+    let bestIndex = -1;
+    let minDistance = 100;
 
     gridCells.forEach((cell, i) => {
-        const cellRect = cell.getBoundingClientRect();
-        const cellCenter = {
-            x: cellRect.left + cellRect.width / 2,
-            y: cellRect.top + cellRect.height / 2
-        };
-
-        const dist = Math.sqrt(
-            Math.pow(elCenter.x - cellCenter.x, 2) + 
-            Math.pow(elCenter.y - cellCenter.y, 2)
-        );
-
-        if (dist < minDistance) {
-            minDistance = dist;
-            bestIndex = i;
-        }
+        const r = cell.getBoundingClientRect();
+        const cCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        const d = Math.sqrt((elCenter.x - cCenter.x) ** 2 + (elCenter.y - cCenter.y) ** 2);
+        if (d < minDistance) { minDistance = d; bestIndex = i; }
     });
 
     if (bestIndex !== -1) {
-        const targetCell = gridCells[bestIndex];
-        const targetRect = targetCell.getBoundingClientRect();
-        
-        el.style.position = "absolute";
-        // 親要素(#grid-container)からの相対位置に変換
+        const cell = gridCells[bestIndex];
+        const cellRect = cell.getBoundingClientRect();
         const containerRect = document.getElementById("grid-container").getBoundingClientRect();
-        el.style.left = (targetRect.left - containerRect.left) + "px";
-        el.style.top = (targetRect.top - containerRect.top) + "px";
-        
-        el.classList.remove("piece-small");
-        el.classList.add("piece-large");
+
+        // 修正：コンテナの相対位置を正しく計算して配置
+        el.style.position = "absolute";
+        el.style.left = (cellRect.left - containerRect.left) + "px";
+        el.style.top = (cellRect.top - containerRect.top) + "px";
+        el.classList.replace("piece-small", "piece-large");
         el.dropIndex = bestIndex;
+        // グリッドコンテナに要素を移動（これでスクロールしてもズレない）
+        document.getElementById("grid-container").appendChild(el);
     } else {
-        // 枠外に離した場合は元の場所（parts-area）に戻す
         el.style.position = "relative";
-        el.style.left = "0px";
-        el.style.top = "0px";
-        el.classList.add("piece-small");
-        el.classList.remove("piece-large");
+        el.style.left = "0"; el.style.top = "0";
+        el.classList.replace("piece-large", "piece-small");
         el.dropIndex = undefined;
         partsArea.appendChild(el);
     }
@@ -220,45 +181,21 @@ function snap(el) {
 
 function checkAnswer() {
     const pieces = document.querySelectorAll(".piece");
-    let allPlaced = true;
-    let allCorrect = true;
+    const allCorrect = Array.from(pieces).every(p => p.dropIndex === p.puzzleData.correctIndex);
 
-    pieces.forEach(p => {
-        if (p.dropIndex === undefined) {
-            allPlaced = false;
-        } else if (p.dropIndex !== p.puzzleData.correctIndex) {
-            allCorrect = false;
-        }
-    });
-
-    if (allPlaced && allCorrect) {
+    if (allCorrect && pieces.length > 0) {
         circle.style.display = "block";
         const data = questionList[currentQuestion];
         readingDiv.textContent = data.reading;
-        wordsDiv.textContent = data.words.join("　");
+        wordsDiv.textContent = data.words.join("・");
         nextBtn.style.display = "inline-block";
-    } else {
-        circle.style.display = "none";
-        nextBtn.style.display = "none";
     }
-}
-
-function loadQuestion() {
-    circle.style.display = "none";
-    readingDiv.textContent = "";
-    wordsDiv.textContent = "";
-    nextBtn.style.display = "none";
-    
-    createGrid();
-    const data = questionList[currentQuestion];
-    const pieces = splitKanji(data.kanji);
-    createPieces(pieces);
 }
 
 nextBtn.onclick = () => {
     currentQuestion++;
     if (currentQuestion >= questionList.length) {
-        alert("全問終了！お疲れ様でした！");
+        alert("おわり！");
         location.reload();
     } else {
         loadQuestion();
