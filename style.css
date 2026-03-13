@@ -44,6 +44,12 @@ background:#FFC36B;
 
 }
 
+.active{
+
+background:#FFB74D;
+
+}
+
 #kanji-list{
 
 display:flex;
@@ -68,6 +74,7 @@ border:2px solid #FFD59E;
 border-radius:10px;
 
 }
+
 .selected{
 
 background:#FFD59E;
@@ -149,8 +156,6 @@ gap:20px;
 flex-wrap:wrap;
 
 }
-
-/* パーツ */
 
 .piece{
 
