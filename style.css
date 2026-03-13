@@ -9,10 +9,9 @@ body {
 .title { margin-top: 20px; color: #444; font-size: 32px; }
 .description { margin-bottom: 20px; color: #666; }
 .select-block { margin: 25px 0; }
-
 label { display: block; margin-bottom: 10px; font-weight: bold; color: #555; }
 
-/* ボタンをかわいく復活 */
+/* 共通ボタンデザイン */
 button {
     padding: 12px 24px;
     margin: 5px;
@@ -24,20 +23,38 @@ button {
     box-shadow: 0 4px 0 #e6b87d;
     transition: 0.1s;
 }
-button:active { transform: translateY(3px); box-shadow: none; }
+button:active { transform: translateY(2px); box-shadow: 0 2px 0 #e6b87d; }
 button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; }
+
+/* 漢字ボタン：文字を真ん中に固定 */
+.kanji-btn {
+    font-size: 32px;
+    width: 64px;
+    height: 64px;
+    background: white;
+    border: 2px solid #FFD59E;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 #FFD59E;
+    
+    /* フレックスボックスで中央寄せ */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    vertical-align: middle;
+}
+.kanji-btn.selected { 
+    background: #FFB74D; 
+    color: white; 
+    box-shadow: 0 4px 0 #d99a3d; 
+    border-color: #FFB74D;
+}
 
 #kanji-list {
     display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 12px; max-width: 600px; margin: 0 auto;
+    gap: 12px; max-width: 800px; margin: 0 auto;
 }
-
-.kanji-btn {
-    font-size: 28px; width: 60px; height: 60px;
-    background: white; border: 2px solid #FFD59E; border-radius: 12px;
-    box-shadow: 0 4px 0 #FFD59E;
-}
-.kanji-btn.selected { background: #FFD59E; color: #444; }
 
 /* パズル画面のレイアウト */
 #main-puzzle-layout {
@@ -52,7 +69,7 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 #reading { font-size: 40px; color: #d35400; }
 #words { font-size: 24px; color: #555; }
 
-#grid-container { position: relative; width: 450px; height: 450px; }
+#grid-container { position: relative; width: 450px; height: 450px; margin: 0 auto; }
 #grid {
     width: 100%; height: 100%; display: grid; gap: 8px;
     background: #FFD59E; padding: 10px; border-radius: 25px; box-sizing: border-box;
