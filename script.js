@@ -2,7 +2,7 @@ const kanji = "森"
 
 const gridSize = 2
 
-const canvasSize = 300
+const canvasSize = 420
 
 const grid = document.getElementById("grid")
 
@@ -37,7 +37,7 @@ const ctx = base.getContext("2d")
 
 ctx.fillStyle="black"
 
-ctx.font="260px 'Noto Sans JP'"
+ctx.font="340px 'Noto Sans JP'"
 
 ctx.textAlign="center"
 ctx.textBaseline="middle"
@@ -91,6 +91,8 @@ pieces.forEach(p=>{
 
 p.canvas.classList.add("piece")
 
+p.canvas.puzzleData=p
+
 partsArea.appendChild(p.canvas)
 
 enableDrag(p)
@@ -110,10 +112,10 @@ piece.canvas.addEventListener("pointerdown",e=>{
 
 dragging=true
 
+piece.canvas.classList.add("dragging")
+
 offsetX=e.offsetX
 offsetY=e.offsetY
-
-piece.canvas.style.position="absolute"
 
 })
 
@@ -131,6 +133,8 @@ document.addEventListener("pointerup",()=>{
 if(!dragging)return
 
 dragging=false
+
+piece.canvas.classList.remove("dragging")
 
 snapToGrid(piece)
 
@@ -163,7 +167,7 @@ bestIndex=i
 
 })
 
-if(bestDist<120){
+if(bestDist<150){
 
 const cell=gridCells[bestIndex]
 
@@ -182,15 +186,17 @@ checkAnswer()
 
 function checkAnswer(){
 
-const pieces=[...document.querySelectorAll(".piece")]
-
 let correct=true
 
-pieces.forEach((p,i)=>{
+const pieces=[...document.querySelectorAll(".piece")]
 
-const expected=i
+pieces.forEach(p=>{
 
-if(p.dropIndex!==expected){
+const data=p.puzzleData
+
+const expectedIndex=data.correctY*gridSize + data.correctX
+
+if(p.dropIndex!==expectedIndex){
 
 correct=false
 
@@ -199,6 +205,10 @@ correct=false
 })
 
 if(correct){
+
+grid.style.background="transparent"
+
+gridCells.forEach(c=>c.style.visibility="hidden")
 
 setTimeout(()=>{
 
@@ -213,5 +223,7 @@ alert("正解！")
 createGrid()
 
 const pieces=splitKanji()
+
+pieces.sort(()=>Math.random()-0.5)
 
 createPieces(pieces)
