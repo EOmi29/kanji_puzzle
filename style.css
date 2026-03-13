@@ -3,97 +3,73 @@ body {
     background: #FFF7E8;
     text-align: center;
     margin: 0;
+    user-select: none; /* テキスト選択を防ぐ */
 }
 
 .title { margin-top: 20px; color: #444; }
+.description { margin-bottom: 30px; }
+.select-block { margin: 20px; }
 
-/* レイアウト：横に並べる */
-#main-puzzle-layout {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
-    margin: 20px auto;
-}
-
-/* 縦書きの設定 */
-.vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-    font-weight: bold;
-    min-width: 50px;
-    height: 720px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.5;
-}
-
-#reading { font-size: 40px; color: #d35400; }
-#words { font-size: 28px; color: #555; }
-
-#grid-container {
-    position: relative;
-    width: 720px;
-    height: 720px;
-}
-
-#grid {
-    width: 720px;
-    height: 720px;
-    display: grid;
-    gap: 10px;
+/* 元の使いやすいボタンデザインへ */
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
     background: #FFD59E;
-    padding: 10px;
-    border-radius: 20px;
-    box-sizing: border-box;
+    font-size: 16px;
+    cursor: pointer;
+}
+button:hover { background: #FFC36B; }
+.active { background: #FFB74D; font-weight: bold; }
+
+#kanji-list {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px; max-width: 800px; margin: auto;
 }
 
-.grid-cell { background: white; border-radius: 10px; }
+.kanji-btn {
+    font-size: 28px; width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center;
+    background: white; border: 2px solid #FFD59E; border-radius: 10px;
+}
+.kanji-btn.selected { background: #FFD59E; }
+
+/* レイアウト */
+#main-puzzle-layout {
+    display: flex; justify-content: center; align-items: center;
+    gap: 30px; margin: 20px auto;
+}
+.vertical-text {
+    writing-mode: vertical-rl; text-orientation: upright;
+    font-weight: bold; min-width: 60px; height: 720px;
+    display: flex; align-items: center; justify-content: center;
+}
+#reading { font-size: 40px; color: #d35400; }
+#words { font-size: 24px; color: #555; }
+
+#grid-container { position: relative; width: 720px; height: 720px; }
+#grid {
+    width: 720px; height: 720px; display: grid; gap: 10px;
+    background: #FFD59E; padding: 10px; border-radius: 30px; box-sizing: border-box;
+}
+.grid-cell { background: white; border-radius: 20px; }
 
 #correct-circle {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 550px; height: 550px;
-    border: 30px solid rgba(255, 0, 0, 0.6);
-    border-radius: 50%;
-    display: none;
-    pointer-events: none;
-    z-index: 100;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border: 20px solid red; border-radius: 50%; display: none;
+    pointer-events: none; z-index: 200; box-sizing: border-box;
 }
 
 #parts-container {
-    width: 90%; max-width: 1000px;
-    margin: 20px auto;
-    border: 4px dashed #FFD59E;
-    border-radius: 20px;
-    padding: 20px;
-    background: #FFF3D8;
+    width: 1100px; min-height: 250px; margin: auto;
+    border: 6px dashed #FFD59E; border-radius: 30px;
+    padding: 20px; background: #FFF3D8;
 }
+#parts-area { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
 
-#parts-area {
-    display: flex; justify-content: center;
-    gap: 15px; flex-wrap: wrap;
-    min-height: 150px;
-}
-
-.piece { touch-action: none; cursor: grab; z-index: 10; }
+.piece { touch-action: none; cursor: pointer; position: relative; z-index: 10; }
 .piece-small { transform: scale(0.4); }
 .piece-large { transform: scale(1); }
 
-#next-button {
-    padding: 15px 40px;
-    font-size: 20px;
-    background: #FFB74D;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    margin-bottom: 40px;
-}
-
-/* 漢字選択エリア */
-#kanji-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px; }
-.kanji-btn { font-size: 24px; width: 50px; height: 50px; background: white; border: 2px solid #FFD59E; border-radius: 10px; cursor: pointer; }
-.kanji-btn.selected { background: #FFD59E; }
-.active { background: #FFB74D; font-weight: bold; }
+#next-button { margin: 20px; background: #FFB74D; font-size: 20px; padding: 15px 30px; }
