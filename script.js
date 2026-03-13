@@ -27,8 +27,6 @@ const nextBtn=document.getElementById("next-button")
 
 const canvasSize=720
 
-/* 漢字ボタン */
-
 const kanjiList=document.getElementById("kanji-list")
 
 kanjiData.forEach(k=>{
@@ -59,14 +57,11 @@ kanjiList.appendChild(btn)
 
 })
 
-/* マス選択 */
-
 document.querySelectorAll(".split-btn").forEach(btn=>{
 
 btn.onclick=()=>{
 
-document.querySelectorAll(".split-btn")
-.forEach(b=>b.classList.remove("active"))
+document.querySelectorAll(".split-btn").forEach(b=>b.classList.remove("active"))
 
 btn.classList.add("active")
 
@@ -76,14 +71,11 @@ gridSize=parseInt(btn.dataset.size)
 
 })
 
-/* 問題数 */
-
 document.querySelectorAll(".count-btn").forEach(btn=>{
 
 btn.onclick=()=>{
 
-document.querySelectorAll(".count-btn")
-.forEach(b=>b.classList.remove("active"))
+document.querySelectorAll(".count-btn").forEach(b=>b.classList.remove("active"))
 
 btn.classList.add("active")
 
@@ -92,8 +84,6 @@ questionCount=parseInt(btn.textContent)
 }
 
 })
-
-/* スタート */
 
 document.getElementById("start-button").onclick=()=>{
 
@@ -112,8 +102,6 @@ currentQuestion=0
 loadQuestion()
 
 }
-
-/* グリッド */
 
 const gridCells=[]
 
@@ -140,8 +128,6 @@ gridCells.push(cell)
 
 }
 
-/* 漢字分割 */
-
 function splitKanji(kanji){
 
 const base=document.createElement("canvas")
@@ -152,9 +138,7 @@ base.height=canvasSize
 const ctx=base.getContext("2d")
 
 ctx.fillStyle="black"
-
 ctx.font="600px 'Noto Sans JP'"
-
 ctx.textAlign="center"
 ctx.textBaseline="middle"
 
@@ -175,17 +159,7 @@ part.height=size
 
 const pctx=part.getContext("2d")
 
-pctx.drawImage(
-base,
-x*size,
-y*size,
-size,
-size,
-0,
-0,
-size,
-size
-)
+pctx.drawImage(base,x*size,y*size,size,size,0,0,size,size)
 
 pieces.push({
 canvas:part,
@@ -200,8 +174,6 @@ correctY:y
 return pieces
 
 }
-
-/* パーツ生成 */
 
 function createPieces(pieces){
 
@@ -221,8 +193,6 @@ enableDrag(p)
 })
 
 }
-
-/* ドラッグ */
 
 function enableDrag(piece){
 
@@ -261,8 +231,6 @@ snap(piece)
 })
 
 }
-
-/* 吸着 */
 
 function snap(piece){
 
@@ -307,8 +275,6 @@ checkAnswer()
 
 }
 
-/* 正解判定 */
-
 function checkAnswer(){
 
 const pieces=[...document.querySelectorAll(".piece")]
@@ -323,11 +289,35 @@ let correct=true
 
 pieces.forEach(p=>{
 
-const d=p.puzzleData
+const data=p.puzzleData
+const expected=data.correctY*gridSize+data.correctX
 
-const expect=d.correctY*gridSize+d.correctX
+if(p.dropIndex!==expected){
 
-if(p.dropIndex!=expect){
+correct=false
+return
+
+}
+
+const cell=gridCells[expected]
+
+const cellRect=cell.getBoundingClientRect()
+const pieceRect=p.getBoundingClientRect()
+
+const cellCenterX=cellRect.left+cellRect.width/2
+const cellCenterY=cellRect.top+cellRect.height/2
+
+const pieceCenterX=pieceRect.left+pieceRect.width/2
+const pieceCenterY=pieceRect.top+pieceRect.height/2
+
+const dx=cellCenterX-pieceCenterX
+const dy=cellCenterY-pieceCenterY
+
+const distance=Math.sqrt(dx*dx+dy*dy)
+
+const tolerance = gridSize===2 ? 60 : 80
+
+if(distance>tolerance){
 
 correct=false
 
@@ -350,8 +340,6 @@ nextBtn.style.display="inline-block"
 
 }
 
-/* 問題ロード */
-
 function loadQuestion(){
 
 circle.style.display="none"
@@ -368,8 +356,6 @@ const pieces=splitKanji(data.kanji)
 createPieces(pieces)
 
 }
-
-/* 次の問題 */
 
 nextBtn.onclick=()=>{
 
