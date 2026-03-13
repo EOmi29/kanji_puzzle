@@ -81,8 +81,6 @@ background:#FFD59E;
 
 }
 
-/* グリッド */
-
 #grid-container{
 
 position:relative;
@@ -111,8 +109,6 @@ border-radius:20px;
 
 }
 
-/* 正解丸 */
-
 #correct-circle{
 
 position:absolute;
@@ -127,12 +123,10 @@ pointer-events:none;
 
 }
 
-/* パーツ置き場 */
-
 #parts-container{
 
 width:1100px;
-height:160px;
+height:320px;
 margin:auto;
 border:6px dashed #FFD59E;
 border-radius:30px;
