@@ -59,11 +59,16 @@ kanjiList.appendChild(btn)
 
 })
 
-/* 分割 */
+/* マス選択 */
 
 document.querySelectorAll(".split-btn").forEach(btn=>{
 
 btn.onclick=()=>{
+
+document.querySelectorAll(".split-btn")
+.forEach(b=>b.classList.remove("active"))
+
+btn.classList.add("active")
 
 gridSize=parseInt(btn.dataset.size)
 
@@ -76,6 +81,11 @@ gridSize=parseInt(btn.dataset.size)
 document.querySelectorAll(".count-btn").forEach(btn=>{
 
 btn.onclick=()=>{
+
+document.querySelectorAll(".count-btn")
+.forEach(b=>b.classList.remove("active"))
+
+btn.classList.add("active")
 
 questionCount=parseInt(btn.textContent)
 
@@ -103,27 +113,6 @@ loadQuestion()
 
 }
 
-/* 問題ロード */
-
-function loadQuestion(){
-
-grid.innerHTML=""
-partsArea.innerHTML=""
-circle.style.display="none"
-readingDiv.textContent=""
-wordsDiv.textContent=""
-nextBtn.style.display="none"
-
-const data=questionList[currentQuestion]
-
-createGrid()
-
-const pieces=splitKanji(data.kanji)
-
-createPieces(pieces)
-
-}
-
 /* グリッド */
 
 const gridCells=[]
@@ -131,6 +120,8 @@ const gridCells=[]
 function createGrid(){
 
 gridCells.length=0
+
+grid.innerHTML=""
 
 grid.style.gridTemplateColumns=`repeat(${gridSize},1fr)`
 grid.style.gridTemplateRows=`repeat(${gridSize},1fr)`
@@ -149,7 +140,7 @@ gridCells.push(cell)
 
 }
 
-/* 分割 */
+/* 漢字分割 */
 
 function splitKanji(kanji){
 
@@ -210,7 +201,7 @@ return pieces
 
 }
 
-/* パーツ */
+/* パーツ生成 */
 
 function createPieces(pieces){
 
@@ -243,10 +234,10 @@ piece.canvas.addEventListener("pointerdown",e=>{
 
 dragging=true
 
-piece.canvas.style.position="absolute"
-
 offsetX=e.offsetX
 offsetY=e.offsetY
+
+piece.canvas.style.position="absolute"
 
 piece.canvas.setPointerCapture(e.pointerId)
 
@@ -270,6 +261,7 @@ snap(piece)
 })
 
 }
+
 /* 吸着 */
 
 function snap(piece){
@@ -358,7 +350,26 @@ nextBtn.style.display="inline-block"
 
 }
 
-/* 次 */
+/* 問題ロード */
+
+function loadQuestion(){
+
+circle.style.display="none"
+readingDiv.textContent=""
+wordsDiv.textContent=""
+nextBtn.style.display="none"
+
+createGrid()
+
+const data=questionList[currentQuestion]
+
+const pieces=splitKanji(data.kanji)
+
+createPieces(pieces)
+
+}
+
+/* 次の問題 */
 
 nextBtn.onclick=()=>{
 
