@@ -1,23 +1,30 @@
+// --- 漢字データ管理エリア (将来的に別ファイル化しやすいよう独立) ---
 const kanjiData = [
     { kanji: "森", reading: "もり", words: ["森林", "森の中"] },
     { kanji: "話", reading: "はなし", words: ["会話", "電話"] },
     { kanji: "海", reading: "うみ", words: ["海岸", "海水"] }
+    // ここに1000文字まで追加可能
 ];
 
+// --- グローバル変数 ---
 let gridSize = 2;
 let questionCount = 5;
 let selectedKanji = [];
 let questionList = [];
 let currentQuestion = 0;
+let gridCells = [];
 
+const home = document.getElementById("home-screen");
+const puzzle = document.getElementById("puzzle-screen");
 const grid = document.getElementById("grid");
 const partsArea = document.getElementById("parts-area");
 const circle = document.getElementById("correct-circle");
 const readingDiv = document.getElementById("reading");
 const wordsDiv = document.getElementById("words");
 const nextBtn = document.getElementById("next-button");
+const gridContainer = document.getElementById("grid-container");
 
-// 初期化（漢字リスト）
+// --- 初期設定 ---
 kanjiData.forEach(k => {
     const btn = document.createElement("button");
     btn.className = "kanji-btn";
@@ -33,7 +40,7 @@ kanjiData.forEach(k => {
     document.getElementById("kanji-list").appendChild(btn);
 });
 
-// ボタンイベント設定
+// 各種設定ボタン
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
@@ -51,24 +58,25 @@ document.querySelectorAll(".count-btn").forEach(btn => {
 });
 
 document.getElementById("start-button").onclick = () => {
-    if(selectedKanji.length === 0) return alert("漢字を選んでください");
+    if (selectedKanji.length === 0) return alert("漢字をえらんでね！");
     questionList = [...selectedKanji].sort(() => Math.random() - 0.5).slice(0, questionCount);
-    document.getElementById("home-screen").style.display = "none";
-    document.getElementById("puzzle-screen").style.display = "block";
+    home.style.display = "none";
+    puzzle.style.display = "block";
     loadQuestion();
 };
 
+// --- パズルロジック ---
+
 function createGrid() {
     grid.innerHTML = "";
+    gridCells = [];
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-    const cells = [];
     for (let i = 0; i < gridSize * gridSize; i++) {
         const cell = document.createElement("div");
         cell.className = "grid-cell";
         grid.appendChild(cell);
-        cells.push(cell);
+        gridCells.push(cell);
     }
-    return cells;
 }
 
 function splitKanji(kanji) {
@@ -93,17 +101,19 @@ function splitKanji(kanji) {
     return pieces;
 }
 
-let gridCells = [];
-
 function loadQuestion() {
+    // 【重要】前回のパーツを完全に消去（partsAreaだけでなくgridContainerからも）
+    document.querySelectorAll(".piece").forEach(p => p.remove());
+    
     circle.style.display = "none";
     readingDiv.textContent = "";
     wordsDiv.textContent = "";
     nextBtn.style.display = "none";
-    gridCells = createGrid();
-    const pieces = splitKanji(questionList[currentQuestion].kanji);
     
-    partsArea.innerHTML = "";
+    createGrid();
+    const data = questionList[currentQuestion];
+    const pieces = splitKanji(data.kanji);
+
     pieces.sort(() => Math.random() - 0.5).forEach(p => {
         const cvs = p.canvas;
         cvs.className = "piece piece-small";
@@ -116,22 +126,20 @@ function loadQuestion() {
 
 function enableDrag(el) {
     let dragging = false;
-    let startX, startY;
 
     el.addEventListener("pointerdown", e => {
         dragging = true;
         el.setPointerCapture(e.pointerId);
-        const rect = el.getBoundingClientRect();
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
         el.style.position = "fixed";
         el.style.zIndex = 1000;
+        
+        // 【修正点】クリックした瞬間にパーツの中心がマウスに来るように調整
+        updatePosition(el, e);
     });
 
     el.addEventListener("pointermove", e => {
         if (!dragging) return;
-        el.style.left = (e.clientX - startX) + "px";
-        el.style.top = (e.clientY - startY) + "px";
+        updatePosition(el, e);
     });
 
     el.addEventListener("pointerup", e => {
@@ -142,12 +150,19 @@ function enableDrag(el) {
     });
 }
 
+// パーツの中心をマウスに合わせる補助関数
+function updatePosition(el, e) {
+    const rect = el.getBoundingClientRect();
+    el.style.left = (e.clientX - rect.width / 2) + "px";
+    el.style.top = (e.clientY - rect.height / 2) + "px";
+}
+
 function snap(el) {
     const elRect = el.getBoundingClientRect();
     const elCenter = { x: elRect.left + elRect.width / 2, y: elRect.top + elRect.height / 2 };
     
     let bestIndex = -1;
-    let minDistance = 100;
+    let minDistance = 120; // 判定距離を少し広げて吸着しやすく
 
     gridCells.forEach((cell, i) => {
         const r = cell.getBoundingClientRect();
@@ -159,35 +174,36 @@ function snap(el) {
     if (bestIndex !== -1) {
         const cell = gridCells[bestIndex];
         const cellRect = cell.getBoundingClientRect();
-        const containerRect = document.getElementById("grid-container").getBoundingClientRect();
+        const containerRect = gridContainer.getBoundingClientRect();
 
-        // 修正：コンテナの相対位置を正しく計算して配置
         el.style.position = "absolute";
         el.style.left = (cellRect.left - containerRect.left) + "px";
         el.style.top = (cellRect.top - containerRect.top) + "px";
-        el.classList.replace("piece-small", "piece-large");
+        el.classList.remove("piece-small");
+        el.classList.add("piece-large");
         el.dropIndex = bestIndex;
-        // グリッドコンテナに要素を移動（これでスクロールしてもズレない）
-        document.getElementById("grid-container").appendChild(el);
+        gridContainer.appendChild(el); // グリッド内に物理的に移動
     } else {
         el.style.position = "relative";
         el.style.left = "0"; el.style.top = "0";
-        el.classList.replace("piece-large", "piece-small");
+        el.classList.add("piece-small");
+        el.classList.remove("piece-large");
         el.dropIndex = undefined;
-        partsArea.appendChild(el);
+        partsArea.appendChild(el); // パーツエリアに戻す
     }
     checkAnswer();
 }
 
 function checkAnswer() {
     const pieces = document.querySelectorAll(".piece");
+    // 全パーツが正しい位置にあるかチェック
     const allCorrect = Array.from(pieces).every(p => p.dropIndex === p.puzzleData.correctIndex);
 
     if (allCorrect && pieces.length > 0) {
         circle.style.display = "block";
         const data = questionList[currentQuestion];
         readingDiv.textContent = data.reading;
-        wordsDiv.textContent = data.words.join("・");
+        wordsDiv.textContent = data.words.join(" ・ ");
         nextBtn.style.display = "inline-block";
     }
 }
@@ -195,7 +211,7 @@ function checkAnswer() {
 nextBtn.onclick = () => {
     currentQuestion++;
     if (currentQuestion >= questionList.length) {
-        alert("おわり！");
+        alert("全問クリアです！");
         location.reload();
     } else {
         loadQuestion();
