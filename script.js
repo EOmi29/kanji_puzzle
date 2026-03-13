@@ -1,24 +1,136 @@
-const kanji="経"
+const kanjiData=[
 
-/* 4分割なら2、9分割なら3 */
+{kanji:"森",reading:"もり",words:["森林","森の中"]},
+{kanji:"話",reading:"はなし",words:["会話","電話"]},
+{kanji:"海",reading:"うみ",words:["海岸","海水"]}
 
-const gridSize=3
+]
+
+let gridSize=2
+let questionCount=5
+let selectedKanji=[]
+
+let questionList=[]
+let currentQuestion=0
+
+const home=document.getElementById("home-screen")
+const puzzle=document.getElementById("puzzle-screen")
+
+const grid=document.getElementById("grid")
+const partsArea=document.getElementById("parts-area")
+const circle=document.getElementById("correct-circle")
+
+const readingDiv=document.getElementById("reading")
+const wordsDiv=document.getElementById("words")
+
+const nextBtn=document.getElementById("next-button")
 
 const canvasSize=720
 
-const grid=document.getElementById("grid")
+/* 漢字ボタン */
 
-const partsArea=document.getElementById("parts-area")
+const kanjiList=document.getElementById("kanji-list")
 
-const circle=document.getElementById("correct-circle")
+kanjiData.forEach(k=>{
+
+const btn=document.createElement("button")
+
+btn.className="kanji-btn"
+
+btn.textContent=k.kanji
+
+btn.onclick=()=>{
+
+btn.classList.toggle("selected")
+
+if(selectedKanji.includes(k)){
+
+selectedKanji=selectedKanji.filter(x=>x!=k)
+
+}else{
+
+selectedKanji.push(k)
+
+}
+
+}
+
+kanjiList.appendChild(btn)
+
+})
+
+/* 分割 */
+
+document.querySelectorAll(".split-btn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+gridSize=parseInt(btn.dataset.size)
+
+}
+
+})
+
+/* 問題数 */
+
+document.querySelectorAll(".count-btn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+questionCount=parseInt(btn.textContent)
+
+}
+
+})
+
+/* スタート */
+
+document.getElementById("start-button").onclick=()=>{
+
+questionList=[...selectedKanji]
+
+questionList.sort(()=>Math.random()-0.5)
+
+questionList=questionList.slice(0,questionCount)
+
+home.style.display="none"
+
+puzzle.style.display="block"
+
+currentQuestion=0
+
+loadQuestion()
+
+}
+
+/* 問題ロード */
+
+function loadQuestion(){
+
+grid.innerHTML=""
+partsArea.innerHTML=""
+circle.style.display="none"
+readingDiv.textContent=""
+wordsDiv.textContent=""
+nextBtn.style.display="none"
+
+const data=questionList[currentQuestion]
+
+createGrid()
+
+const pieces=splitKanji(data.kanji)
+
+createPieces(pieces)
+
+}
+
+/* グリッド */
 
 const gridCells=[]
 
-let completed=false
-
-/* グリッド作成 */
-
 function createGrid(){
+
+gridCells.length=0
 
 grid.style.gridTemplateColumns=`repeat(${gridSize},1fr)`
 grid.style.gridTemplateRows=`repeat(${gridSize},1fr)`
@@ -37,9 +149,9 @@ gridCells.push(cell)
 
 }
 
-/* 漢字分割 */
+/* 分割 */
 
-function splitKanji(){
+function splitKanji(kanji){
 
 const base=document.createElement("canvas")
 
@@ -57,7 +169,7 @@ ctx.textBaseline="middle"
 
 ctx.fillText(kanji,canvasSize/2,canvasSize/2)
 
-const partSize=canvasSize/gridSize
+const size=canvasSize/gridSize
 
 const pieces=[]
 
@@ -67,21 +179,21 @@ for(let x=0;x<gridSize;x++){
 
 const part=document.createElement("canvas")
 
-part.width=partSize
-part.height=partSize
+part.width=size
+part.height=size
 
 const pctx=part.getContext("2d")
 
 pctx.drawImage(
 base,
-x*partSize,
-y*partSize,
-partSize,
-partSize,
+x*size,
+y*size,
+size,
+size,
 0,
 0,
-partSize,
-partSize
+size,
+size
 )
 
 pieces.push({
@@ -98,7 +210,7 @@ return pieces
 
 }
 
-/* パーツ作成 */
+/* パーツ */
 
 function createPieces(pieces){
 
@@ -125,87 +237,73 @@ function enableDrag(piece){
 
 let dragging=false
 
-let offsetX=0
-let offsetY=0
-
-piece.canvas.addEventListener("pointerdown",e=>{
-
-if(completed)return
+piece.canvas.onpointerdown=e=>{
 
 dragging=true
 
-piece.canvas.classList.add("dragging")
-
-offsetX=e.offsetX
-offsetY=e.offsetY
-
 piece.canvas.style.position="absolute"
 
-})
+}
 
-document.addEventListener("pointermove",e=>{
+document.onpointermove=e=>{
 
 if(!dragging)return
 
-piece.canvas.style.left=e.pageX-offsetX+"px"
-piece.canvas.style.top=e.pageY-offsetY+"px"
+piece.canvas.style.left=e.pageX-100+"px"
+piece.canvas.style.top=e.pageY-100+"px"
 
-})
+}
 
-document.addEventListener("pointerup",()=>{
+document.onpointerup=()=>{
 
 if(!dragging)return
 
 dragging=false
 
-piece.canvas.classList.remove("dragging")
-
-snapToGrid(piece)
-
-})
+snap(piece)
 
 }
 
-/* グリッド吸着 */
+}
 
-function snapToGrid(piece){
+/* 吸着 */
 
-const rects=gridCells.map(c=>c.getBoundingClientRect())
+function snap(piece){
 
-const pieceRect=piece.canvas.getBoundingClientRect()
-
-let bestIndex=-1
+let best=-1
 let bestDist=99999
 
-rects.forEach((r,i)=>{
+gridCells.forEach((cell,i)=>{
 
-const dx=r.left-pieceRect.left
-const dy=r.top-pieceRect.top
+const r=cell.getBoundingClientRect()
 
-const dist=Math.sqrt(dx*dx+dy*dy)
+const dx=r.left-piece.canvas.getBoundingClientRect().left
+const dy=r.top-piece.canvas.getBoundingClientRect().top
 
-if(dist<bestDist){
+const d=Math.sqrt(dx*dx+dy*dy)
 
-bestDist=dist
-bestIndex=i
+if(d<bestDist){
+
+bestDist=d
+best=i
 
 }
 
 })
 
-if(bestDist<260){
+if(bestDist<250){
 
-const cell=gridCells[bestIndex]
+const cell=gridCells[best]
 
-const rect=cell.getBoundingClientRect()
+const r=cell.getBoundingClientRect()
 
-piece.canvas.style.left=rect.left+"px"
-piece.canvas.style.top=rect.top+"px"
-
-piece.dropIndex=bestIndex
+piece.canvas.style.left=r.left+"px"
+piece.canvas.style.top=r.top+"px"
 
 piece.canvas.classList.remove("piece-small")
 piece.canvas.classList.add("piece-large")
+
+piece.dropIndex=best
 
 checkAnswer()
 
@@ -229,11 +327,11 @@ let correct=true
 
 pieces.forEach(p=>{
 
-const data=p.puzzleData
+const d=p.puzzleData
 
-const expected=data.correctY*gridSize+data.correctX
+const expect=d.correctY*gridSize+d.correctX
 
-if(p.dropIndex!==expected){
+if(p.dropIndex!=expect){
 
 correct=false
 
@@ -241,24 +339,35 @@ correct=false
 
 })
 
-if(correct&&!completed){
-
-completed=true
-
-grid.style.background="transparent"
-
-gridCells.forEach(c=>c.style.visibility="hidden")
+if(correct){
 
 circle.style.display="block"
 
-}
+const data=questionList[currentQuestion]
+
+readingDiv.textContent=data.reading
+wordsDiv.textContent=data.words.join("　")
+
+nextBtn.style.display="inline-block"
 
 }
 
-/* 初期化 */
+}
 
-createGrid()
+/* 次 */
 
-const pieces=splitKanji()
+nextBtn.onclick=()=>{
 
-createPieces(pieces)
+currentQuestion++
+
+if(currentQuestion>=questionList.length){
+
+location.reload()
+
+}else{
+
+loadQuestion()
+
+}
+
+}
