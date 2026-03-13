@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <title>漢字パズル</title>
 
 <link rel="stylesheet" href="style.css">
@@ -15,9 +14,54 @@
 
 <body>
 
+<!-- ホーム画面 -->
+
+<div id="home-screen">
+
 <h1 class="title">漢字パズル</h1>
 
-<div class="game-area">
+<p class="description">
+漢字を正しい位置において完成させよう
+</p>
+
+<div class="select-block">
+
+<label>漢字をえらぶ</label>
+
+<div id="kanji-list"></div>
+
+</div>
+
+<div class="select-block">
+
+<label>分割</label>
+
+<button class="split-btn" data-size="2">4分割</button>
+<button class="split-btn" data-size="3">9分割</button>
+
+</div>
+
+<div class="select-block">
+
+<label>問題数</label>
+
+<button class="count-btn">5</button>
+<button class="count-btn">10</button>
+<button class="count-btn">15</button>
+
+</div>
+
+<button id="start-button">
+問題を出す
+</button>
+
+</div>
+
+<!-- 問題画面 -->
+
+<div id="puzzle-screen" style="display:none">
+
+<h1 class="title">漢字パズル</h1>
 
 <div id="grid-container">
 
@@ -29,11 +73,21 @@
 
 <div id="parts-container">
 
-<div class="parts-title">ここからパーツを動かそう</div>
+<div class="parts-title">
+ここからパーツを動かそう
+</div>
 
 <div id="parts-area"></div>
 
 </div>
+
+<div id="reading"></div>
+
+<div id="words"></div>
+
+<button id="next-button" style="display:none">
+つぎのもんだい
+</button>
 
 </div>
 
