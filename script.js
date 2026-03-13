@@ -1,4 +1,4 @@
-const kanji = "森"
+const kanji = "話"
 
 const gridSize = 2
 
