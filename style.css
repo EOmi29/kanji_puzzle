@@ -11,7 +11,6 @@ body {
 .select-block { margin: 25px 0; }
 label { display: block; margin-bottom: 10px; font-weight: bold; color: #555; }
 
-/* 共通ボタンデザイン */
 button {
     padding: 12px 24px;
     margin: 5px;
@@ -26,7 +25,20 @@ button {
 button:active { transform: translateY(2px); box-shadow: 0 2px 0 #e6b87d; }
 button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; }
 
-/* 漢字ボタン：文字を真ん中に固定 */
+/* 漢字リストの見出し */
+.term-heading {
+    text-align: left;
+    max-width: 800px;
+    margin: 20px auto 10px;
+    padding-left: 10px;
+    border-left: 5px solid #FFB74D;
+    font-weight: bold;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .kanji-btn {
     font-size: 32px;
     width: 64px;
@@ -35,8 +47,6 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
     border: 2px solid #FFD59E;
     border-radius: 12px;
     box-shadow: 0 4px 0 #FFD59E;
-    
-    /* フレックスボックスで中央寄せ */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -51,25 +61,34 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
     border-color: #FFB74D;
 }
 
-#kanji-list {
+.kanji-list-row {
     display: flex; flex-wrap: wrap; justify-content: center;
     gap: 12px; max-width: 800px; margin: 0 auto;
 }
 
-/* パズル画面のレイアウト */
+/* パズル画面：中央に寄せる調整 */
 #main-puzzle-layout {
-    display: flex; justify-content: center; align-items: center;
-    gap: 20px; margin: 10px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* グリッドとの間隔を狭める */
+    margin: 10px auto;
 }
 .vertical-text {
-    writing-mode: vertical-rl; text-orientation: upright;
-    font-weight: bold; min-width: 50px; height: 450px;
-    display: flex; align-items: center; justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-weight: bold;
+    min-width: 60px;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-#reading { font-size: 40px; color: #d35400; }
-#words { font-size: 24px; color: #555; }
+/* 読みと熟語のフォントサイズと色の調整 */
+#reading { font-size: 44px; color: #d35400; }
+#words { font-size: 26px; color: #444; background: rgba(255,255,255,0.5); border-radius: 10px; }
 
-#grid-container { position: relative; width: 450px; height: 450px; margin: 0 auto; }
+#grid-container { position: relative; width: 450px; height: 450px; }
 #grid {
     width: 100%; height: 100%; display: grid; gap: 8px;
     background: #FFD59E; padding: 10px; border-radius: 25px; box-sizing: border-box;
