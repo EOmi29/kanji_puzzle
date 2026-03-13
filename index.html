@@ -1,81 +1,113 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>漢字パズル</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
-</head>
-<body>
+body {
+    font-family: "Noto Sans JP", sans-serif;
+    background: #FFF7E8;
+    text-align: center;
+    margin: 0;
+    user-select: none;
+}
 
-<div id="home-screen">
-    <h1 class="title">漢字パズル</h1>
-    <p class="description">漢字を正しい位置において完成させよう</p>
+.title { margin-top: 20px; color: #444; font-size: 32px; }
+.description { margin-bottom: 20px; color: #666; }
+.select-block { margin: 25px 0; }
+label { display: block; margin-bottom: 10px; font-weight: bold; color: #555; }
 
-    <div class="select-block">
-        <label>なに年生の漢字？</label>
-        <div id="grade-select">
-            <button class="grade-btn" data-grade="1">1年</button>
-            <button class="grade-btn" data-grade="2">2年</button>
-            <button class="grade-btn" data-grade="3">3年</button>
-            <button class="grade-btn" data-grade="4">4年</button>
-            <button class="grade-btn" data-grade="5">5年</button>
-            <button class="grade-btn" data-grade="6">6年</button>
-        </div>
-    </div>
+button {
+    padding: 12px 24px;
+    margin: 5px;
+    border: none;
+    border-radius: 15px;
+    background: #FFD59E;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #e6b87d;
+    transition: 0.1s;
+}
+button:active { transform: translateY(2px); box-shadow: 0 2px 0 #e6b87d; }
+button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; }
 
-    <div id="term-area" class="select-block" style="display:none;">
-        <label>なん学期？</label>
-        <div id="term-select">
-            <button class="term-btn" data-term="1">1学期</button>
-            <button class="term-btn" data-term="2">2学期</button>
-            <button class="term-btn" data-term="3">3学期</button>
-        </div>
-    </div>
+/* 漢字リストの見出し */
+.term-heading {
+    text-align: left;
+    max-width: 800px;
+    margin: 20px auto 10px;
+    padding-left: 10px;
+    border-left: 5px solid #FFB74D;
+    font-weight: bold;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-    <div id="kanji-area" class="select-block" style="display:none;">
-        <div style="margin-bottom:15px;">
-            <button id="select-all-btn" style="background:#81D4FA; box-shadow: 0 4px 0 #4ba3c7;">ぜんぶえらぶ</button>
-        </div>
-        <div id="kanji-list"></div>
-    </div>
+.kanji-btn {
+    font-size: 32px;
+    width: 64px;
+    height: 64px;
+    background: white;
+    border: 2px solid #FFD59E;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 #FFD59E;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    vertical-align: middle;
+}
+.kanji-btn.selected { 
+    background: #FFB74D; 
+    color: white; 
+    box-shadow: 0 4px 0 #d99a3d; 
+    border-color: #FFB74D;
+}
 
-    <div class="select-block">
-        <label>設定</label>
-        <button class="split-btn active" data-size="2">4マス</button>
-        <button class="split-btn" data-size="3">9マス</button>
-        <span style="margin:0 10px; color:#ccc;">|</span>
-        <button class="count-btn active">3</button>
-        <button class="count-btn">5</button>
-        <button class="count-btn">10</button>
-    </div>
+.kanji-list-row {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 12px; max-width: 800px; margin: 0 auto;
+}
 
-    <button id="start-button" style="margin-top:20px; background:#FFB74D; font-weight:bold; display:none; padding:15px 50px; font-size:22px;">
-        パズルをはじめる
-    </button>
-</div>
+/* パズル画面：中央に寄せる調整 */
+#main-puzzle-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* グリッドとの間隔を狭める */
+    margin: 10px auto;
+}
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-weight: bold;
+    min-width: 60px;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* 読みと熟語のフォントサイズと色の調整 */
+#reading { font-size: 44px; color: #d35400; }
+#words { font-size: 26px; color: #444; background: rgba(255,255,255,0.5); border-radius: 10px; }
 
-<div id="puzzle-screen" style="display:none">
-    <h1 class="title">漢字パズル</h1>
-    
-    <div id="main-puzzle-layout">
-        <div id="words" class="vertical-text"></div>
-        <div id="grid-container">
-            <div id="grid"></div>
-            <div id="correct-circle"></div>
-        </div>
-        <div id="reading" class="vertical-text"></div>
-    </div>
+#grid-container { position: relative; width: 450px; height: 450px; }
+#grid {
+    width: 100%; height: 100%; display: grid; gap: 8px;
+    background: #FFD59E; padding: 10px; border-radius: 25px; box-sizing: border-box;
+}
+.grid-cell { background: white; border-radius: 15px; }
 
-    <div id="parts-container">
-        <div class="parts-title">パーツをドラッグして上の枠に入れよう</div>
-        <div id="parts-area"></div>
-    </div>
+#correct-circle {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border: 20px solid rgba(255, 0, 0, 0.6); border-radius: 50%;
+    display: none; pointer-events: none; z-index: 200; box-sizing: border-box;
+}
 
-    <button id="next-button" style="display:none">つぎのもんだいへ</button>
-</div>
+#parts-container {
+    width: 90%; max-width: 700px; min-height: 150px; margin: 20px auto;
+    border: 5px dashed #FFD59E; border-radius: 25px;
+    padding: 20px; background: #FFF3D8;
+}
+#parts-area { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
 
-<script src="data.js"></script>
-<script src="script.js"></script>
-</body>
-</html>
+.piece { touch-action: none; z-index: 10; }
+.piece-small { transform: scale(0.6); }
+.piece-large { transform: scale(1); }
