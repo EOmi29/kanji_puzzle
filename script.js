@@ -236,36 +236,40 @@ enableDrag(p)
 function enableDrag(piece){
 
 let dragging=false
+let offsetX=0
+let offsetY=0
 
-piece.canvas.onpointerdown=e=>{
+piece.canvas.addEventListener("pointerdown",e=>{
 
 dragging=true
 
 piece.canvas.style.position="absolute"
 
-}
+offsetX=e.offsetX
+offsetY=e.offsetY
 
-document.onpointermove=e=>{
+piece.canvas.setPointerCapture(e.pointerId)
 
-if(!dragging)return
+})
 
-piece.canvas.style.left=e.pageX-100+"px"
-piece.canvas.style.top=e.pageY-100+"px"
-
-}
-
-document.onpointerup=()=>{
+piece.canvas.addEventListener("pointermove",e=>{
 
 if(!dragging)return
+
+piece.canvas.style.left=(e.pageX-offsetX)+"px"
+piece.canvas.style.top=(e.pageY-offsetY)+"px"
+
+})
+
+piece.canvas.addEventListener("pointerup",e=>{
 
 dragging=false
 
 snap(piece)
 
-}
+})
 
 }
-
 /* 吸着 */
 
 function snap(piece){
