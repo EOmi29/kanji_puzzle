@@ -10,6 +10,7 @@
 
 <div id="home-screen">
     <h1 class="title">漢字パズル</h1>
+    <p class="description">漢字を正しい位置において完成させよう</p>
 
     <div class="select-block">
         <label>なに年生の漢字？</label>
@@ -33,28 +34,30 @@
     </div>
 
     <div id="kanji-area" class="select-block" style="display:none;">
-        <div style="margin-bottom:10px;">
-            <button id="select-all-btn" style="background:#81D4FA;">ぜんぶえらぶ</button>
+        <div style="margin-bottom:15px;">
+            <button id="select-all-btn" style="background:#81D4FA; box-shadow: 0 4px 0 #4ba3c7;">ぜんぶえらぶ</button>
         </div>
         <div id="kanji-list"></div>
     </div>
 
     <div class="select-block">
-        <label>マスの数・もんだい数</label>
+        <label>設定</label>
         <button class="split-btn active" data-size="2">4マス</button>
         <button class="split-btn" data-size="3">9マス</button>
-        ｜
-        <button class="count-btn active">5</button>
+        <span style="margin:0 10px; color:#ccc;">|</span>
+        <button class="count-btn active">3</button>
+        <button class="count-btn">5</button>
         <button class="count-btn">10</button>
     </div>
 
-    <button id="start-button" style="margin-top:20px; background:#FFB74D; font-weight:bold; display:none;">
+    <button id="start-button" style="margin-top:20px; background:#FFB74D; font-weight:bold; display:none; padding:15px 50px; font-size:22px;">
         パズルをはじめる
     </button>
 </div>
 
 <div id="puzzle-screen" style="display:none">
     <h1 class="title">漢字パズル</h1>
+    
     <div id="main-puzzle-layout">
         <div id="words" class="vertical-text"></div>
         <div id="grid-container">
@@ -63,9 +66,12 @@
         </div>
         <div id="reading" class="vertical-text"></div>
     </div>
+
     <div id="parts-container">
+        <div class="parts-title">パーツをドラッグして上の枠に入れよう</div>
         <div id="parts-area"></div>
     </div>
+
     <button id="next-button" style="display:none">つぎのもんだいへ</button>
 </div>
 
