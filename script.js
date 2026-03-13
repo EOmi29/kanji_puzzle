@@ -2,19 +2,21 @@ const kanji = "森"
 
 const gridSize = 2
 
-const canvasSize = 420
+const canvasSize = 700
 
 const grid = document.getElementById("grid")
-
 const partsArea = document.getElementById("parts-area")
+const circle = document.getElementById("correct-circle")
 
-const gridCells = []
+const gridCells=[]
+
+let completed=false
 
 function createGrid(){
 
 for(let i=0;i<gridSize*gridSize;i++){
 
-const cell = document.createElement("div")
+const cell=document.createElement("div")
 
 cell.className="grid-cell"
 
@@ -28,23 +30,23 @@ gridCells.push(cell)
 
 function splitKanji(){
 
-const base = document.createElement("canvas")
+const base=document.createElement("canvas")
 
-base.width = canvasSize
-base.height = canvasSize
+base.width=canvasSize
+base.height=canvasSize
 
-const ctx = base.getContext("2d")
+const ctx=base.getContext("2d")
 
 ctx.fillStyle="black"
 
-ctx.font="340px 'Noto Sans JP'"
+ctx.font="560px 'Noto Sans JP'"
 
 ctx.textAlign="center"
 ctx.textBaseline="middle"
 
 ctx.fillText(kanji,canvasSize/2,canvasSize/2)
 
-const partSize = canvasSize/gridSize
+const partSize=canvasSize/gridSize
 
 const pieces=[]
 
@@ -52,12 +54,12 @@ for(let y=0;y<gridSize;y++){
 
 for(let x=0;x<gridSize;x++){
 
-const part = document.createElement("canvas")
+const part=document.createElement("canvas")
 
 part.width=partSize
 part.height=partSize
 
-const pctx = part.getContext("2d")
+const pctx=part.getContext("2d")
 
 pctx.drawImage(
 base,
@@ -87,6 +89,10 @@ return pieces
 
 function createPieces(pieces){
 
+/* 完全ランダム配置 */
+
+pieces.sort(()=>Math.random()-0.5)
+
 pieces.forEach(p=>{
 
 p.canvas.classList.add("piece")
@@ -109,6 +115,8 @@ let offsetX=0
 let offsetY=0
 
 piece.canvas.addEventListener("pointerdown",e=>{
+
+if(completed)return
 
 dragging=true
 
@@ -167,7 +175,7 @@ bestIndex=i
 
 })
 
-if(bestDist<150){
+if(bestDist<250){
 
 const cell=gridCells[bestIndex]
 
@@ -204,17 +212,15 @@ correct=false
 
 })
 
-if(correct){
+if(correct && !completed){
+
+completed=true
 
 grid.style.background="transparent"
 
 gridCells.forEach(c=>c.style.visibility="hidden")
 
-setTimeout(()=>{
-
-alert("正解！")
-
-},200)
+circle.style.display="block"
 
 }
 
@@ -223,7 +229,5 @@ alert("正解！")
 createGrid()
 
 const pieces=splitKanji()
-
-pieces.sort(()=>Math.random()-0.5)
 
 createPieces(pieces)
