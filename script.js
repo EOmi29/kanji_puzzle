@@ -1,4 +1,4 @@
-const kanji="森"
+const kanji="経"
 
 /* 4分割なら2、9分割なら3 */
 
