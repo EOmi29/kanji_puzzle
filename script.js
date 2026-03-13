@@ -1,18 +1,27 @@
-const kanji = "話"
+const kanji="森"
 
-const gridSize = 2
+/* 4分割なら2、9分割なら3 */
 
-const canvasSize = 700
+const gridSize=3
 
-const grid = document.getElementById("grid")
-const partsArea = document.getElementById("parts-area")
-const circle = document.getElementById("correct-circle")
+const canvasSize=720
+
+const grid=document.getElementById("grid")
+
+const partsArea=document.getElementById("parts-area")
+
+const circle=document.getElementById("correct-circle")
 
 const gridCells=[]
 
 let completed=false
 
+/* グリッド作成 */
+
 function createGrid(){
+
+grid.style.gridTemplateColumns=`repeat(${gridSize},1fr)`
+grid.style.gridTemplateRows=`repeat(${gridSize},1fr)`
 
 for(let i=0;i<gridSize*gridSize;i++){
 
@@ -28,6 +37,8 @@ gridCells.push(cell)
 
 }
 
+/* 漢字分割 */
+
 function splitKanji(){
 
 const base=document.createElement("canvas")
@@ -39,7 +50,7 @@ const ctx=base.getContext("2d")
 
 ctx.fillStyle="black"
 
-ctx.font="560px 'Noto Sans JP'"
+ctx.font="600px 'Noto Sans JP'"
 
 ctx.textAlign="center"
 ctx.textBaseline="middle"
@@ -87,15 +98,16 @@ return pieces
 
 }
 
-function createPieces(pieces){
+/* パーツ作成 */
 
-/* 完全ランダム配置 */
+function createPieces(pieces){
 
 pieces.sort(()=>Math.random()-0.5)
 
 pieces.forEach(p=>{
 
 p.canvas.classList.add("piece")
+p.canvas.classList.add("piece-small")
 
 p.canvas.puzzleData=p
 
@@ -106,6 +118,8 @@ enableDrag(p)
 })
 
 }
+
+/* ドラッグ */
 
 function enableDrag(piece){
 
@@ -124,6 +138,8 @@ piece.canvas.classList.add("dragging")
 
 offsetX=e.offsetX
 offsetY=e.offsetY
+
+piece.canvas.style.position="absolute"
 
 })
 
@@ -150,6 +166,8 @@ snapToGrid(piece)
 
 }
 
+/* グリッド吸着 */
+
 function snapToGrid(piece){
 
 const rects=gridCells.map(c=>c.getBoundingClientRect())
@@ -175,7 +193,7 @@ bestIndex=i
 
 })
 
-if(bestDist<250){
+if(bestDist<260){
 
 const cell=gridCells[bestIndex]
 
@@ -186,25 +204,36 @@ piece.canvas.style.top=rect.top+"px"
 
 piece.dropIndex=bestIndex
 
+piece.canvas.classList.remove("piece-small")
+piece.canvas.classList.add("piece-large")
+
 checkAnswer()
 
 }
 
 }
 
+/* 正解判定 */
+
 function checkAnswer(){
 
-let correct=true
-
 const pieces=[...document.querySelectorAll(".piece")]
+
+for(let p of pieces){
+
+if(p.dropIndex===undefined)return
+
+}
+
+let correct=true
 
 pieces.forEach(p=>{
 
 const data=p.puzzleData
 
-const expectedIndex=data.correctY*gridSize + data.correctX
+const expected=data.correctY*gridSize+data.correctX
 
-if(p.dropIndex!==expectedIndex){
+if(p.dropIndex!==expected){
 
 correct=false
 
@@ -212,7 +241,7 @@ correct=false
 
 })
 
-if(correct && !completed){
+if(correct&&!completed){
 
 completed=true
 
@@ -225,6 +254,8 @@ circle.style.display="block"
 }
 
 }
+
+/* 初期化 */
 
 createGrid()
 
