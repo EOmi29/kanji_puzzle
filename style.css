@@ -3,79 +3,39 @@ body {
     background: #FFF7E8;
     text-align: center;
     margin: 0;
-    overflow-x: hidden;
 }
 
-.title {
-    margin-top: 20px;
-    color: #444;
-}
+.title { margin-top: 20px; color: #444; }
 
-.description {
-    margin-bottom: 30px;
-}
-
-.select-block {
-    margin: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: none;
-    border-radius: 10px;
-    background: #FFD59E;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-button:hover {
-    background: #FFC36B;
-}
-
-.active {
-    background: #FFB74D;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-    font-weight: bold;
-}
-
-#kanji-list {
+/* レイアウト：横に並べる */
+#main-puzzle-layout {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    max-width: 600px;
-    margin: 0 auto;
+    align-items: center;
+    gap: 40px;
+    margin: 20px auto;
 }
 
-.kanji-btn {
-    font-size: 24px;
-    width: 50px;
-    height: 50px;
+/* 縦書きの設定 */
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-weight: bold;
+    min-width: 50px;
+    height: 720px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: white;
-    border: 2px solid #FFD59E;
-    border-radius: 10px;
+    line-height: 1.5;
 }
 
-.kanji-btn.selected {
-    background: #FFD59E;
-}
+#reading { font-size: 40px; color: #d35400; }
+#words { font-size: 28px; color: #555; }
 
 #grid-container {
     position: relative;
     width: 720px;
     height: 720px;
-    margin: 20px auto;
 }
 
 #grid {
@@ -89,18 +49,13 @@ button:hover {
     box-sizing: border-box;
 }
 
-.grid-cell {
-    background: white;
-    border-radius: 10px;
-}
+.grid-cell { background: white; border-radius: 10px; }
 
 #correct-circle {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 500px;
+    width: 550px; height: 550px;
     border: 30px solid rgba(255, 0, 0, 0.6);
     border-radius: 50%;
     display: none;
@@ -109,9 +64,7 @@ button:hover {
 }
 
 #parts-container {
-    width: 90%;
-    max-width: 1000px;
-    min-height: 200px;
+    width: 90%; max-width: 1000px;
     margin: 20px auto;
     border: 4px dashed #FFD59E;
     border-radius: 20px;
@@ -120,39 +73,27 @@ button:hover {
 }
 
 #parts-area {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
+    display: flex; justify-content: center;
+    gap: 15px; flex-wrap: wrap;
+    min-height: 150px;
 }
 
-.piece {
-    touch-action: none;
-    cursor: grab;
-    z-index: 10;
-}
+.piece { touch-action: none; cursor: grab; z-index: 10; }
+.piece-small { transform: scale(0.4); }
+.piece-large { transform: scale(1); }
 
-.piece:active {
-    cursor: grabbing;
-}
-
-/* パズル枠内に入った時の拡大率調整 */
-.piece-small {
-    transform: scale(0.5);
-}
-
-.piece-large {
-    transform: scale(1);
-}
-
-#reading {
-    font-size: 32px;
-    font-weight: bold;
-    color: #d35400;
-    margin-top: 10px;
-}
-
-#words {
+#next-button {
+    padding: 15px 40px;
     font-size: 20px;
-    margin-bottom: 20px;
+    background: #FFB74D;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-bottom: 40px;
 }
+
+/* 漢字選択エリア */
+#kanji-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px; }
+.kanji-btn { font-size: 24px; width: 50px; height: 50px; background: white; border: 2px solid #FFD59E; border-radius: 10px; cursor: pointer; }
+.kanji-btn.selected { background: #FFD59E; }
+.active { background: #FFB74D; font-weight: bold; }
