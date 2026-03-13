@@ -1,4 +1,3 @@
-// 漢字データ（将来的に外部JSやJSONにするのがおすすめ）
 const kanjiData = [
     { kanji: "森", reading: "もり", words: ["森林", "森の中"] },
     { kanji: "話", reading: "はなし", words: ["会話", "電話"] },
@@ -6,15 +5,68 @@ const kanjiData = [
 ];
 
 let gridSize = 2;
-let questionCount = 5;
+let questionCount = 3;
 let selectedKanji = [];
 let questionList = [];
 let currentQuestion = 0;
 let gridCells = [];
+const baseSize = 450; // タブレット向けサイズ
 
-const baseSize = 450; // グリッドの基準サイズを450pxに縮小
+// 漢字リストの生成（ここが動かないと選べない）
+const listEl = document.getElementById("kanji-list");
+kanjiData.forEach(k => {
+    const btn = document.createElement("button");
+    btn.className = "kanji-btn";
+    btn.textContent = k.kanji;
+    btn.onclick = () => {
+        btn.classList.toggle("selected");
+        if (selectedKanji.includes(k)) {
+            selectedKanji = selectedKanji.filter(x => x !== k);
+        } else {
+            selectedKanji.push(k);
+        }
+    };
+    listEl.appendChild(btn);
+});
 
-// 初期化などは前回と同様のため省略（ロジックの肝となる部分のみ更新）
+// マス目と問題数の選択
+document.querySelectorAll(".split-btn").forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        gridSize = parseInt(btn.dataset.size);
+    };
+});
+
+document.querySelectorAll(".count-btn").forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll(".count-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        questionCount = parseInt(btn.textContent);
+    };
+});
+
+// 開始
+document.getElementById("start-button").onclick = () => {
+    if (selectedKanji.length === 0) return alert("漢字をえらんでね！");
+    questionList = [...selectedKanji].sort(() => Math.random() - 0.5).slice(0, questionCount);
+    document.getElementById("home-screen").style.display = "none";
+    document.getElementById("puzzle-screen").style.display = "block";
+    loadQuestion();
+};
+
+function createGrid() {
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    gridCells = [];
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    for (let i = 0; i < gridSize * gridSize; i++) {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+        grid.appendChild(cell);
+        gridCells.push(cell);
+    }
+}
 
 function splitKanji(kanji) {
     const size = baseSize / gridSize;
@@ -22,8 +74,6 @@ function splitKanji(kanji) {
     const base = document.createElement("canvas");
     base.width = baseSize; base.height = baseSize;
     const ctx = base.getContext("2d");
-    
-    // 漢字のサイズも基準サイズに合わせて調整
     ctx.font = `${baseSize * 0.8}px 'Noto Sans JP'`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -40,44 +90,58 @@ function splitKanji(kanji) {
     return pieces;
 }
 
+function loadQuestion() {
+    document.querySelectorAll(".piece").forEach(p => p.remove());
+    document.getElementById("correct-circle").style.display = "none";
+    document.getElementById("reading").textContent = "";
+    document.getElementById("words").textContent = "";
+    document.getElementById("next-button").style.display = "none";
+    
+    createGrid();
+    const data = questionList[currentQuestion];
+    const pieces = splitKanji(data.kanji);
+
+    pieces.sort(() => Math.random() - 0.5).forEach(p => {
+        const cvs = p.canvas;
+        cvs.className = "piece piece-small";
+        cvs.puzzleData = p;
+        cvs.dropIndex = undefined;
+        document.getElementById("parts-area").appendChild(cvs);
+        enableDrag(cvs);
+    });
+}
+
 function enableDrag(el) {
     let dragging = false;
-
-    el.addEventListener("pointerdown", e => {
+    const startDrag = (e) => {
         dragging = true;
         el.setPointerCapture(e.pointerId);
         el.style.position = "fixed";
         el.style.zIndex = 1000;
-        
-        updatePosition(el, e);
-    });
-
-    el.addEventListener("pointermove", e => {
-        if (!dragging) return;
-        updatePosition(el, e);
-    });
-
-    el.addEventListener("pointerup", e => {
+        updatePos(e);
+    };
+    const moveDrag = (e) => { if (dragging) updatePos(e); };
+    const stopDrag = (e) => {
         if (!dragging) return;
         dragging = false;
         el.style.zIndex = 10;
         snap(el);
-    });
-}
-
-function updatePosition(el, e) {
-    const rect = el.getBoundingClientRect();
-    // 指やマウスの真下に中心が来るように配置
-    el.style.left = (e.clientX - rect.width / 2) + "px";
-    el.style.top = (e.clientY - rect.height / 2) + "px";
+    };
+    const updatePos = (e) => {
+        const rect = el.getBoundingClientRect();
+        el.style.left = (e.clientX - rect.width / 2) + "px";
+        el.style.top = (e.clientY - rect.height / 2) + "px";
+    };
+    el.addEventListener("pointerdown", startDrag);
+    el.addEventListener("pointermove", moveDrag);
+    el.addEventListener("pointerup", stopDrag);
 }
 
 function snap(el) {
     const elRect = el.getBoundingClientRect();
     const elCenter = { x: elRect.left + elRect.width / 2, y: elRect.top + elRect.height / 2 };
-    
     let bestIndex = -1;
-    let minDistance = 80; // サイズ縮小に合わせて吸着感度を調整
+    let minDistance = 80;
 
     gridCells.forEach((cell, i) => {
         const r = cell.getBoundingClientRect();
@@ -86,27 +150,44 @@ function snap(el) {
         if (d < minDistance) { minDistance = d; bestIndex = i; }
     });
 
+    const gridContainer = document.getElementById("grid-container");
     if (bestIndex !== -1) {
-        const cell = gridCells[bestIndex];
-        const cellRect = cell.getBoundingClientRect();
-        const containerRect = document.getElementById("grid-container").getBoundingClientRect();
-
+        const cellRect = gridCells[bestIndex].getBoundingClientRect();
+        const containerRect = gridContainer.getBoundingClientRect();
         el.style.position = "absolute";
         el.style.left = (cellRect.left - containerRect.left) + "px";
         el.style.top = (cellRect.top - containerRect.top) + "px";
-        el.classList.remove("piece-small");
-        el.classList.add("piece-large");
+        el.classList.replace("piece-small", "piece-large");
         el.dropIndex = bestIndex;
-        document.getElementById("grid-container").appendChild(el);
+        gridContainer.appendChild(el);
     } else {
         el.style.position = "relative";
         el.style.left = "0"; el.style.top = "0";
-        el.classList.add("piece-small");
-        el.classList.remove("piece-large");
+        el.classList.replace("piece-large", "piece-small");
         el.dropIndex = undefined;
         document.getElementById("parts-area").appendChild(el);
     }
     checkAnswer();
 }
 
-// 読み込み・次への処理は前回と同様
+function checkAnswer() {
+    const pieces = document.querySelectorAll(".piece");
+    const allCorrect = Array.from(pieces).every(p => p.dropIndex === p.puzzleData.correctIndex);
+    if (allCorrect && pieces.length > 0) {
+        document.getElementById("correct-circle").style.display = "block";
+        const data = questionList[currentQuestion];
+        document.getElementById("reading").textContent = data.reading;
+        document.getElementById("words").textContent = data.words.join(" ・ ");
+        document.getElementById("next-button").style.display = "inline-block";
+    }
+}
+
+document.getElementById("next-button").onclick = () => {
+    currentQuestion++;
+    if (currentQuestion >= questionList.length) {
+        alert("全問クリア！");
+        location.reload();
+    } else {
+        loadQuestion();
+    }
+};
