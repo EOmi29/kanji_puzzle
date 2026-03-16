@@ -685,7 +685,7 @@ const kanjiData = [
     { kanji: "滋", grade: 4, term: 3, reading: "し・じ", words: ["滋賀県", "滋養"] },
     { kanji: "阪", grade: 4, term: 3, reading: "はん", words: ["大阪府", ""] },
     { kanji: "媛", grade: 4, term: 3, reading: "えん", words: ["愛媛県", ""] },
-    { kanji: "佐", grade: 4, term: 3, reading: "さ︿める﹀・かく", words: ["佐賀県", "大佐"] },
+    { kanji: "佐", grade: 4, term: 3, reading: "さ", words: ["佐賀県", "大佐"] },
     { kanji: "崎", grade: 4, term: 3, reading: "さき", words: ["長崎県", "宮崎県"] },
 
 
