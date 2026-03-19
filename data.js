@@ -959,7 +959,7 @@ const kanjiData = [
     { kanji: "暮", grade: 6, term: 1, reading: "く（らす）・ぼ", words: ["一人暮らし", "野暮"] },
     { kanji: "供", grade: 6, term: 1, reading: "とも・きょう", words: ["子供", "供与"] },
     { kanji: "系", grade: 6, term: 1, reading: "けい", words: ["系譜", "ラテン系"] },
-    { kanji: "誤", grade: 6, term: 1, reading: "あやま（る）・ご", words: ["誤解", "謝りがある"] },
+    { kanji: "誤", grade: 6, term: 1, reading: "あやま（る）・ご", words: ["誤解", "誤りがある"] },
     { kanji: "傷", grade: 6, term: 1, reading: "きず・しょう", words: ["傷つく", "傷害"] },
     { kanji: "厳", grade: 6, term: 1, reading: "きび（しい）・げん", words: ["手厳しい", "厳格な父"] },
     { kanji: "論", grade: 6, term: 1, reading: "ろん", words: ["反論", "討論"] },
