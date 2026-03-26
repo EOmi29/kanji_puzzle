@@ -149,6 +149,15 @@ function createGrid() {
         grid.appendChild(cell); gridCells.push(cell);
     }
 }
+function isEmptyCanvas(canvas) {
+    const ctx = canvas.getContext("2d");
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+    for (let i = 3; i < img.length; i += 4) {
+        if (img[i] !== 0) return false;
+    }
+    return true;
+}
 
 function splitKanji(kanji) {
     const size = baseSize / gridSize;
@@ -163,8 +172,24 @@ function splitKanji(kanji) {
         for (let x = 0; x < gridSize; x++) {
             const part = document.createElement("canvas");
             part.width = size; part.height = size;
-            part.getContext("2d").drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
-            pieces.push({ canvas: part, correctIndex: y * gridSize + x });
+const pctx = part.getContext("2d");
+pctx.drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
+
+// 空ピース検知
+if (isEmptyCanvas(part)) {
+    // 半透明背景を付与
+    pctx.fillStyle = "rgba(0,0,0,0.08)";
+    pctx.fillRect(0, 0, size, size);
+
+    // 枠線（視認性向上）
+    pctx.strokeStyle = "rgba(0,0,0,0.25)";
+    pctx.strokeRect(0, 0, size, size);
+
+    // データ属性（必要ならCSS制御用）
+    part.dataset.empty = "true";
+}
+
+pieces.push({ canvas: part, correctIndex: y * gridSize + x });
         }
     }
     return pieces;
