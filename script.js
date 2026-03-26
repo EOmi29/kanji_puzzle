@@ -15,7 +15,6 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
         btn.classList.add("active");
         selectedGrade = parseInt(btn.dataset.grade);
         document.getElementById("term-area").style.display = "block";
-        // 学期ボタンの選択状態をリセット
         document.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
         selectedTerm = null;
     };
@@ -24,13 +23,12 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
 // ② 学期ボタン
 document.querySelectorAll(".term-btn").forEach(btn => {
     btn.onclick = () => {
-        btn.classList.add("active"); // 学期は複数選んでいるように見えないよう、押した瞬間だけ光るか、あるいはそのままにする
+        btn.classList.add("active");
         selectedTerm = parseInt(btn.dataset.term);
         addKanjiSection();
     };
 });
 
-// 漢字セクションを見出し付きで追加
 function addKanjiSection() {
     const container = document.getElementById("kanji-sections");
     document.getElementById("kanji-container").style.display = "block";
@@ -64,8 +62,6 @@ function addKanjiSection() {
     const row = document.createElement("div");
     row.className = "kanji-list-row";
 
-    // --- ここから修正 ---
-    // このセクション内のボタンをまとめて管理するための配列
     const sectionButtons = [];
 
     filtered.forEach(k => {
@@ -83,21 +79,17 @@ function addKanjiSection() {
         };
         
         row.appendChild(btn);
-        // 配列に保存しておく
         sectionButtons.push({ element: btn, data: k });
     });
 
-    // ぜんぶえらぶボタンのクリックイベントを「1回だけ」設定
     allBtn.onclick = () => {
         sectionButtons.forEach(item => {
-            // まだ選択されていない場合だけクリック処理を行う
             if (!item.element.classList.contains("selected")) {
                 item.element.classList.add("selected");
                 selectedKanji.push(item.data);
             }
         });
     };
-    // --- 修正ここまで ---
 
     heading.appendChild(allBtn);
     section.appendChild(heading);
@@ -105,7 +97,6 @@ function addKanjiSection() {
     container.appendChild(section);
 }
 
-// リセットボタン
 document.getElementById("clear-all-btn").onclick = () => {
     document.getElementById("kanji-sections").innerHTML = "";
     selectedKanji = [];
@@ -113,7 +104,6 @@ document.getElementById("clear-all-btn").onclick = () => {
     document.getElementById("start-button").style.display = "none";
 };
 
-// 以降のパズルロジックは前回同様
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
@@ -145,10 +135,13 @@ function createGrid() {
     gridCells = [];
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
     for (let i = 0; i < gridSize * gridSize; i++) {
-        const cell = document.createElement("div"); cell.className = "grid-cell";
-        grid.appendChild(cell); gridCells.push(cell);
+        const cell = document.createElement("div");
+        cell.className = "grid-cell";
+        grid.appendChild(cell);
+        gridCells.push(cell);
     }
 }
+
 function isEmptyCanvas(canvas) {
     const ctx = canvas.getContext("2d");
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -163,33 +156,41 @@ function splitKanji(kanji) {
     const size = baseSize / gridSize;
     const pieces = [];
     const base = document.createElement("canvas");
-    base.width = baseSize; base.height = baseSize;
+    base.width = baseSize;
+    base.height = baseSize;
+
     const ctx = base.getContext("2d");
     ctx.font = `${baseSize * 0.8}px 'Noto Sans JP'`;
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(kanji, baseSize/2, baseSize/2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(kanji, baseSize / 2, baseSize / 2);
+
     for (let y = 0; y < gridSize; y++) {
         for (let x = 0; x < gridSize; x++) {
             const part = document.createElement("canvas");
-            part.width = size; part.height = size;
-const pctx = part.getContext("2d");
-pctx.drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
+            part.width = size;
+            part.height = size;
 
-// 空ピース検知
-if (isEmptyCanvas(part)) {
-    // 半透明背景を付与
-    pctx.fillStyle = "rgba(0,0,0,0.08)";
-    pctx.fillRect(0, 0, size, size);
+            const pctx = part.getContext("2d");
+            pctx.drawImage(base, x * size, y * size, size, size, 0, 0, size, size);
 
-    // 枠線（視認性向上）
-    pctx.strokeStyle = "rgba(0,0,0,0.25)";
-    pctx.strokeRect(0, 0, size, size);
+            const empty = isEmptyCanvas(part);
 
-    // データ属性（必要ならCSS制御用）
-    part.dataset.empty = "true";
-}
+            if (empty) {
+                pctx.fillStyle = "rgba(0,0,0,0.08)";
+                pctx.fillRect(0, 0, size, size);
 
-pieces.push({ canvas: part, correctIndex: y * gridSize + x });
+                pctx.strokeStyle = "rgba(0,0,0,0.25)";
+                pctx.strokeRect(0, 0, size, size);
+
+                part.dataset.empty = "true";
+            }
+
+            pieces.push({
+                canvas: part,
+                correctIndex: y * gridSize + x,
+                isEmpty: empty
+            });
         }
     }
     return pieces;
@@ -201,12 +202,18 @@ function loadQuestion() {
     document.getElementById("reading").textContent = "";
     document.getElementById("words").textContent = "";
     document.getElementById("next-button").style.display = "none";
+
     createGrid();
+
     const data = questionList[currentQuestion];
     const pieces = splitKanji(data.kanji);
+
     pieces.sort(() => Math.random() - 0.5).forEach(p => {
-        const cvs = p.canvas; cvs.className = "piece piece-small";
-        cvs.puzzleData = p; cvs.dropIndex = undefined;
+        const cvs = p.canvas;
+        cvs.className = "piece piece-small";
+        cvs.puzzleData = p;
+        cvs.dropIndex = undefined;
+
         document.getElementById("parts-area").appendChild(cvs);
         enableDrag(cvs);
     });
@@ -214,52 +221,96 @@ function loadQuestion() {
 
 function enableDrag(el) {
     let dragging = false;
+
     const updatePos = (e) => {
         const rect = el.getBoundingClientRect();
         el.style.left = (e.clientX - rect.width / 2) + "px";
         el.style.top = (e.clientY - rect.height / 2) + "px";
     };
+
     el.addEventListener("pointerdown", e => {
-        dragging = true; el.setPointerCapture(e.pointerId);
-        el.style.position = "fixed"; el.style.zIndex = 1000; updatePos(e);
+        dragging = true;
+        el.setPointerCapture(e.pointerId);
+        el.style.position = "fixed";
+        el.style.zIndex = 1000;
+        updatePos(e);
     });
-    el.addEventListener("pointermove", e => { if (dragging) updatePos(e); });
+
+    el.addEventListener("pointermove", e => {
+        if (dragging) updatePos(e);
+    });
+
     el.addEventListener("pointerup", e => {
-        if (!dragging) return; dragging = false; el.style.zIndex = 10;
+        if (!dragging) return;
+        dragging = false;
+        el.style.zIndex = 10;
         snap(el);
     });
 }
 
 function snap(el) {
     const elRect = el.getBoundingClientRect();
-    const elCenter = { x: elRect.left + elRect.width / 2, y: elRect.top + elRect.height / 2 };
-    let bestIndex = -1; let minDistance = 80;
+    const elCenter = {
+        x: elRect.left + elRect.width / 2,
+        y: elRect.top + elRect.height / 2
+    };
+
+    let bestIndex = -1;
+    let minDistance = 80;
+
     gridCells.forEach((cell, i) => {
         const r = cell.getBoundingClientRect();
-        const cCenter = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-        const d = Math.sqrt((elCenter.x - cCenter.x) ** 2 + (elCenter.y - cCenter.y) ** 2);
-        if (d < minDistance) { minDistance = d; bestIndex = i; }
+        const cCenter = {
+            x: r.left + r.width / 2,
+            y: r.top + r.height / 2
+        };
+        const d = Math.sqrt(
+            (elCenter.x - cCenter.x) ** 2 +
+            (elCenter.y - cCenter.y) ** 2
+        );
+        if (d < minDistance) {
+            minDistance = d;
+            bestIndex = i;
+        }
     });
+
     const gridContainer = document.getElementById("grid-container");
+
     if (bestIndex !== -1) {
         const cellRect = gridCells[bestIndex].getBoundingClientRect();
         const containerRect = gridContainer.getBoundingClientRect();
+
         el.style.position = "absolute";
         el.style.left = (cellRect.left - containerRect.left) + "px";
         el.style.top = (cellRect.top - containerRect.top) + "px";
         el.classList.replace("piece-small", "piece-large");
-        el.dropIndex = bestIndex; gridContainer.appendChild(el);
+
+        el.dropIndex = bestIndex;
+        gridContainer.appendChild(el);
     } else {
-        el.style.position = "relative"; el.style.left = "0"; el.style.top = "0";
+        el.style.position = "relative";
+        el.style.left = "0";
+        el.style.top = "0";
         el.classList.replace("piece-large", "piece-small");
-        el.dropIndex = undefined; document.getElementById("parts-area").appendChild(el);
+
+        el.dropIndex = undefined;
+        document.getElementById("parts-area").appendChild(el);
     }
+
     checkAnswer();
 }
 
 function checkAnswer() {
     const pieces = document.querySelectorAll(".piece");
-    const allCorrect = Array.from(pieces).every(p => p.dropIndex === p.puzzleData.correctIndex);
+
+    const allCorrect = Array.from(pieces).every(p => {
+        if (p.dropIndex === undefined) return false;
+
+        if (p.puzzleData.isEmpty) return true;
+
+        return p.dropIndex === p.puzzleData.correctIndex;
+    });
+
     if (allCorrect && pieces.length > 0) {
         document.getElementById("correct-circle").style.display = "block";
         const data = questionList[currentQuestion];
@@ -272,6 +323,9 @@ function checkAnswer() {
 document.getElementById("next-button").onclick = () => {
     currentQuestion++;
     if (currentQuestion >= questionList.length) {
-        alert("全問クリアです！"); location.reload();
-    } else { loadQuestion(); }
+        alert("全問クリアです！");
+        location.reload();
+    } else {
+        loadQuestion();
+    }
 };
