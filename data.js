@@ -593,7 +593,7 @@ const kanjiData = [
     { kanji: "帯", grade: 4, term: 2, reading: "おび・お︿びる﹀・たい", words: ["帯をしめる", "熱帯"] },
     { kanji: "泣", grade: 4, term: 2, reading: "な︿く﹀・きゅう", words: ["泣き叫ぶ", "号泣"] },
     { kanji: "軍", grade: 4, term: 2, reading: "ぐん", words: ["軍人", "軍隊"] },
-    { kanji: "兵", grade: 4, term: 2, reading: "げい・ひょう", words: ["兵士", "兵庫県"] },
+    { kanji: "兵", grade: 4, term: 2, reading: "へい・ひょう", words: ["兵士", "兵庫県"] },
     { kanji: "隊", grade: 4, term: 2, reading: "たい", words: ["隊列", "音楽隊"] },
     { kanji: "輪", grade: 4, term: 2, reading: "わ・りん", words: ["輪投げ", "一輪車"] },
     { kanji: "景", grade: 4, term: 2, reading: "けい", words: ["景品", "景色"] },
