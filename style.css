@@ -73,7 +73,7 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* グリッドとの間隔を狭める */
+    gap: 10px;
     margin: 10px auto;
 }
 .vertical-text {
@@ -104,4 +104,40 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 }
 
 #parts-container {
-    width: 90%; max-width: 700px; min
+    width: 90%; max-width: 700px; min-height: 150px; margin: 20px auto;
+    border: 5px dashed #FFD59E; border-radius: 25px;
+    padding: 20px; background: #FFF3D8;
+}
+#parts-area { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+
+.piece { touch-action: none; z-index: 10; }
+.piece-small { transform: scale(0.6); }
+.piece-large { transform: scale(1); }
+
+/* ボタンが折り返して綺麗に並ぶようにする設定 */
+#term-select {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 700px;
+    margin: 0 auto;
+    gap: 2px;
+}
+
+/* ================================================== */
+/* 学年ボタンと学期ボタンの色の統一（!important） */
+/* ================================================== */
+.grade-btn, .term-btn {
+    background: #FFD59E !important;
+    color: #444 !important;
+    box-shadow: 0 4px 0 #e6b87d !important;
+}
+.grade-btn.active, .term-btn.active {
+    background: #FFB74D !important;
+    color: white !important;
+    box-shadow: 0 4px 0 #d99a3d !important;
+}
+.grade-btn:active, .term-btn:active {
+    transform: translateY(2px) !important;
+    box-shadow: 0 2px 0 #e6b87d !important;
+}
