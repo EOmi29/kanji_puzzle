@@ -50,7 +50,14 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
             });
         } else {
             termLabel.textContent = "② 何学期？（えらぶと下にかんじが出るよ）";
-            [1, 2, 3].forEach(num => {
+            
+            // 【修正ポイント】1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を生成する
+            let termsToShow = [1, 2, 3];
+            if (selectedGrade === 1) {
+                termsToShow = [2, 3];
+            }
+
+            termsToShow.forEach(num => {
                 const tBtn = document.createElement("button");
                 tBtn.className = "term-btn";
                 tBtn.textContent = `${num}学期`;
@@ -60,7 +67,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
             });
         }
         
-        // 【重要】別の学年ボタンを押した時は、完全に最初から選び直すために下の漢字リストと選択データをリセットする
+        // 別の学年ボタンを押した時は、完全に最初から選び直すために下の漢字リストと選択データをリセットする
         document.getElementById("kanji-sections").innerHTML = "";
         document.getElementById("kanji-container").style.display = "none";
         document.getElementById("start-button").style.display = "none";
@@ -76,7 +83,7 @@ function handleTermClick(btn, termValue) {
     const targetSection = document.getElementById(existingId);
 
     if (targetSection) {
-        // 【またぎ選択対応】すでに画面に出ているグループのボタンをもう一度押した場合は、そのグループを消す（トグル動作）
+        // すでに画面に出ているグループのボタンをもう一度押した場合は、そのグループを消す（トグル動作）
         btn.classList.remove("active");
         
         // 選択中データ（selectedKanji）から、このグループの漢字をすべて削除
