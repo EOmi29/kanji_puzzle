@@ -340,7 +340,7 @@ const kanjiData = [
     { kanji: "急", grade: 3, term: 1, reading: "いそ︿ぐ﹀・きゅう", words: ["大急ぎ", "急な用事"] },
     { kanji: "橋", grade: 3, term: 1, reading: "はし・きょう", words: ["橋をわたる", "歩道橋"] },
     { kanji: "登", grade: 3, term: 1, reading: "のぼ︿る﹀・と", words: ["山登り", "登山"] },
-    { kanji: "血", grade: 3, term: 1, reading: "ち・けつ", words: ["なは血", "血えき"] },
+    { kanji: "血", grade: 3, term: 1, reading: "ち・けつ", words: ["はな血", "血えき"] },
     { kanji: "申", grade: 3, term: 1, reading: "もう︿す﹀・しん", words: ["もの申す", "申せいする"] },
     { kanji: "由", grade: 3, term: 1, reading: "ゆう", words: ["自由", ""] },
     { kanji: "想", grade: 3, term: 1, reading: "おも︿う﹀・そう", words: ["想像する", "好きな人を想う"] },
