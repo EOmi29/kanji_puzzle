@@ -64,9 +64,11 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
 
 // ② 学期・行ボタンがクリックされた時の共通処理
 function handleTermClick(btn, termValue) {
-    // 選択されたボタンに active クラスをつける処理
+    // クリックされたボタンと同じエリア（#term-select内）にある他のボタンのactiveを消す
     const parent = document.getElementById("term-select");
     parent.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
+    
+    // クリックしたボタンをオレンジ色にする
     btn.classList.add("active");
     
     selectedTerm = termValue;
@@ -84,7 +86,7 @@ function addKanjiSection() {
         return;
     }
 
-    // データベース（kanjiData）から、選択された「学年」と「term（1〜10）」に完全一致するものを探す
+    // データベース（kanjiData）から、選択された「学年」と「term」に完全一致するものを探す
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
     if (filtered.length === 0) {
         alert("データがありません");
