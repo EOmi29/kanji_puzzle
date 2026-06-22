@@ -164,9 +164,13 @@ function addKanjiSection() {
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
         
+        // 【再修正】リロードや画面またぎをしても、すでに内部データにあれば最初から選択状態にする
+        if (selectedKanji.some(x => x.kanji === k.kanji)) {
+            btn.classList.add("selected");
+        }
+        
         btn.onclick = () => {
             btn.classList.toggle("selected");
-            // 【修正ポイント】オブジェクトの参照不一致を防ぐため、文字(kanji)で判定して追加・削除を行う
             const isAlreadySelected = selectedKanji.some(x => x.kanji === k.kanji);
             if (isAlreadySelected) {
                 selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
@@ -184,10 +188,10 @@ function addKanjiSection() {
         sectionButtons.forEach(item => {
             if (!item.element.classList.contains("selected")) {
                 item.element.classList.add("selected");
-                const isAlreadySelected = selectedKanji.some(x => x.kanji === item.data.kanji);
-                if (!isAlreadySelected) {
-                    selectedKanji.push(item.data);
-                }
+            }
+            const isAlreadySelected = selectedKanji.some(x => x.kanji === item.data.kanji);
+            if (!isAlreadySelected) {
+                selectedKanji.push(item.data);
             }
         });
     };
@@ -235,9 +239,19 @@ document.querySelectorAll(".count-btn").forEach(btn => {
     };
 });
 
+// 出題（スタート）ボタンを押したときの処理
 document.getElementById("start-button").onclick = () => {
-    if (selectedKanji.length === 0) return alert("漢字をえらんでね！");
-    questionList = [...selectedKanji].sort(() => Math.random() - 0.5).slice(0, questionCount);
+    if (selectedKanji.length === 0) {
+        return alert("漢字をえらんでね！");
+    }
+    
+    // 【最重要修正】選んだ漢字をシャッフル
+    let shuffled = [...selectedKanji].sort(() => Math.random() - 0.5);
+    
+    // 設定された問題数（5問、10問など）と、実際に選んだ漢字の数の、小さい方を基準にして正しく切り出す（エラー防止）
+    let actualCount = Math.min(questionCount, shuffled.length);
+    questionList = shuffled.slice(0, actualCount);
+    
     document.getElementById("home-screen").style.display = "none";
     document.getElementById("puzzle-screen").style.display = "block";
     currentQuestion = 0;
