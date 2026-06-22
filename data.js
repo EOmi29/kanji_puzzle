@@ -1102,7 +1102,7 @@ const kanjiData = [
         { kanji: "亜", grade: 7, term: 1, reading: "あ", words: ["亜熱帯", "亜細亜"] },
     { kanji: "哀", grade: 7, term: 1, reading: "かな︿しい﹀・あい", words: ["悲哀", "哀願"] },
     { kanji: "挨", grade: 7, term: 1, reading: "あい", words: ["挨拶", ""] },
-    { kanji: "曖", grade: 7, term: 1, reading: "あい", words: ["あいまい", ""] },
+    { kanji: "曖", grade: 7, term: 1, reading: "あい", words: ["曖昧", ""] },
     { kanji: "握", grade: 7, term: 1, reading: "あく　にぎ︿る﹀", words: ["握力", "把握"] },
     { kanji: "扱", grade: 7, term: 1, reading: "あつか︿う﹀", words: ["取り扱い", ""] },
     { kanji: "宛", grade: 7, term: 1, reading: "あて　えん", words: ["宛先", ""] },
