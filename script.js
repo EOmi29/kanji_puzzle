@@ -8,21 +8,7 @@ let questionList = [];
 let gridCells = [];
 const baseSize = 450;
 
-// 中学校用の「行」の定義（データベースのtermの数値1〜10と、画面のラベルの対応表）
-const chugakuTerms = [
-    { value: 1, label: "あ行" },
-    { value: 2, label: "か行" },
-    { value: 3, label: "さ行" },
-    { value: 4, label: "た行" },
-    { value: 5, label: "な行" },
-    { value: 6, label: "は行" },
-    { value: 7, label: "ま行" },
-    { value: 8, label: "や行" },
-    { value: 9, label: "ら行" },
-    { value: 10, label: "わ行" }
-];
-
-// ① 学年ボタン
+// ① 学年ボタンのクリック処理
 document.querySelectorAll(".grade-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".grade-btn").forEach(b => b.classList.remove("active"));
@@ -30,44 +16,28 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
         selectedGrade = parseInt(btn.dataset.grade);
         
         const termArea = document.getElementById("term-area");
-        const termLabel = document.getElementById("term-label");
         const termSelect = document.getElementById("term-select");
         
         termArea.style.display = "block";
-        termSelect.innerHTML = ""; // 学年が変わるときはステップ②のボタンをリセット
+        termSelect.innerHTML = ""; // 学年が変わるときは一度ボタンをクリア
         selectedTerm = null;
 
-        // 小学校（1~6）と中学校（7）でステップ②のボタンを切り替える
-        if (selectedGrade === 7) {
-            termLabel.textContent = "② どの行？（えらぶと下にかんじが出るよ）";
-            chugakuTerms.forEach(t => {
-                const tBtn = document.createElement("button");
-                tBtn.className = "term-btn";
-                tBtn.textContent = t.label;
-                tBtn.dataset.term = t.value;
-                tBtn.onclick = () => handleTermClick(tBtn, t.value);
-                termSelect.appendChild(tBtn);
-            });
-        } else {
-            termLabel.textContent = "② 何学期？（えらぶと下にかんじが出るよ）";
-            
-            // 1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を生成する
-            let termsToShow = [1, 2, 3];
-            if (selectedGrade === 1) {
-                termsToShow = [2, 3];
-            }
-
-            termsToShow.forEach(num => {
-                const tBtn = document.createElement("button");
-                tBtn.className = "term-btn";
-                tBtn.textContent = `${num}学期`;
-                tBtn.dataset.term = num;
-                tBtn.onclick = () => handleTermClick(tBtn, num);
-                termSelect.appendChild(tBtn);
-            });
+        // 【修正ポイント】1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を動的に生成
+        let termsToShow = [1, 2, 3];
+        if (selectedGrade === 1) {
+            termsToShow = [2, 3];
         }
+
+        termsToShow.forEach(num => {
+            const tBtn = document.createElement("button");
+            tBtn.className = "term-btn";
+            tBtn.textContent = `${num}学期`;
+            tBtn.dataset.term = num;
+            tBtn.onclick = () => handleTermClick(tBtn, num);
+            termSelect.appendChild(tBtn);
+        });
         
-        // 別の学年ボタンを押した時は、完全に最初から選び直すために下の漢字リストと選択データをリセットする
+        // 学年を変えたら下の漢字選択エリアやスタートボタンは一度リセット
         document.getElementById("kanji-sections").innerHTML = "";
         document.getElementById("kanji-container").style.display = "none";
         document.getElementById("start-button").style.display = "none";
@@ -75,7 +45,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
     };
 });
 
-// ② 学期・行ボタンがクリックされた時の共通処理
+// ② 学期ボタンがクリックされた時の処理
 function handleTermClick(btn, termValue) {
     selectedTerm = termValue;
     
@@ -83,10 +53,9 @@ function handleTermClick(btn, termValue) {
     const targetSection = document.getElementById(existingId);
 
     if (targetSection) {
-        // すでに画面に出ているグループのボタンをもう一度押した場合は、そのグループを消す（トグル動作）
+        // すでに画面に出ているグループのボタンをもう一度押した場合は消す（トグル動作）
         btn.classList.remove("active");
         
-        // 選択中データ（selectedKanji）から、このグループの漢字をすべて削除
         const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
         filtered.forEach(k => {
             selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
@@ -94,19 +63,19 @@ function handleTermClick(btn, termValue) {
         
         targetSection.remove();
         
-        // もし画面に漢字リストが一つもなくなったら、エリアごと非表示にする
         const container = document.getElementById("kanji-sections");
         if (container.children.length === 0) {
             document.getElementById("kanji-container").style.display = "none";
             document.getElementById("start-button").style.display = "none";
         }
     } else {
-        // まだ画面に出ていないグループなら、ボタンをオレンジにしてリストを追加する
+        // まだ画面に出ていないグループなら追加
         btn.classList.add("active");
         addKanjiSection();
     }
 }
 
+// 漢字リストを画面に作り出す処理
 function addKanjiSection() {
     const container = document.getElementById("kanji-sections");
     document.getElementById("kanji-container").style.display = "block";
@@ -114,7 +83,6 @@ function addKanjiSection() {
 
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
 
-    // データベース（kanjiData）から、選択された「学年」と「term」に完全一致するものを探す
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
     if (filtered.length === 0) {
         alert("データがありません");
@@ -123,48 +91,27 @@ function addKanjiSection() {
 
     const section = document.createElement("div");
     section.id = existingId;
-    section.style.marginBottom = "30px"; // グループごとの隙間を作って見やすくする
+    section.style.marginBottom = "20px";
     
     const heading = document.createElement("div");
-    heading.className = "term-heading";
-    
-    // 左側に配置する個別の「リストをリセット」ボタン
-    const clearBtn = document.createElement("button");
-    clearBtn.textContent = "リストをリセット";
-    clearBtn.style.fontSize = "12px";
-    clearBtn.style.padding = "5px 10px";
-    clearBtn.style.background = "#ef5350";
-    clearBtn.style.color = "white";
-    clearBtn.style.margin = "0";
-    
-    // 中央のテキスト表示の切り替え
-    const titleSpan = document.createElement("span");
-    if (selectedGrade === 7) {
-        const found = chugakuTerms.find(t => t.value === selectedTerm);
-        titleSpan.innerHTML = `＜ 中学校 ${found ? found.label : ""} ＞`;
-    } else {
-        titleSpan.innerHTML = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
-    }
-    
-    // 右側に配置する「ぜんぶえらぶ」ボタン
-    const allBtn = document.createElement("button");
-    allBtn.textContent = selectedGrade === 7 ? "この行をぜんぶえらぶ" : "この学期をぜんぶえらぶ";
-    allBtn.style.fontSize = "12px";
-    allBtn.style.padding = "5px 10px";
-    allBtn.style.background = "#81D4FA";
-    allBtn.style.margin = "0";
+    heading.style.fontWeight = "bold";
+    heading.style.marginBottom = "5px";
+    heading.style.fontSize = "16px";
+    heading.style.textAlign = "left";
+    heading.textContent = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
     
     const row = document.createElement("div");
-    row.className = "kanji-list-row";
-
-    const sectionButtons = [];
+    // 元のCSSデザインの邪魔をしないように、ボタンが綺麗に並ぶ最低限のスタイル
+    row.style.display = "flex";
+    row.style.flexWrap = "wrap";
+    row.style.gap = "5px";
 
     filtered.forEach(k => {
         const btn = document.createElement("button");
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
         
-        // 【再修正】リロードや画面またぎをしても、すでに内部データにあれば最初から選択状態にする
+        // 以前選んだ状態が残っていればオレンジにする
         if (selectedKanji.some(x => x.kanji === k.kanji)) {
             btn.classList.add("selected");
         }
@@ -180,49 +127,26 @@ function addKanjiSection() {
         };
         
         row.appendChild(btn);
-        sectionButtons.push({ element: btn, data: k });
     });
 
-    // 「ぜんぶえらぶ」を押したときの処理
-    allBtn.onclick = () => {
-        sectionButtons.forEach(item => {
-            if (!item.element.classList.contains("selected")) {
-                item.element.classList.add("selected");
-            }
-            const isAlreadySelected = selectedKanji.some(x => x.kanji === item.data.kanji);
-            if (!isAlreadySelected) {
-                selectedKanji.push(item.data);
-            }
-        });
-    };
-
-    // 個別の「リストをリセット」を押したときの処理
-    clearBtn.onclick = () => {
-        filtered.forEach(k => {
-            selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
-        });
-        section.remove();
-        
-        // 対応するステップ②のボタンのオレンジ色（active）を消す
-        const parent = document.getElementById("term-select");
-        const termBtn = parent.querySelector(`.term-btn[data-term="${selectedTerm}"]`);
-        if (termBtn) termBtn.classList.remove("active");
-        
-        if (container.children.length === 0) {
-            document.getElementById("kanji-container").style.display = "none";
-            document.getElementById("start-button").style.display = "none";
-        }
-    };
-
-    heading.appendChild(clearBtn);
-    heading.appendChild(titleSpan);
-    heading.appendChild(allBtn);
-    
     section.appendChild(heading);
     section.appendChild(row);
     container.appendChild(section);
 }
 
+// 元からHTMLにある「リストをリセット」ボタンの処理
+const clearAllBtn = document.getElementById("clear-all-btn");
+if (clearAllBtn) {
+    clearAllBtn.onclick = () => {
+        selectedKanji = [];
+        document.getElementById("kanji-sections").innerHTML = "";
+        document.getElementById("kanji-container").style.display = "none";
+        document.getElementById("start-button").style.display = "none";
+        document.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
+    };
+}
+
+// 分割数（マス）ボタン
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
@@ -231,6 +155,7 @@ document.querySelectorAll(".split-btn").forEach(btn => {
     };
 });
 
+// 問題数ボタン
 document.querySelectorAll(".count-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".count-btn").forEach(b => b.classList.remove("active"));
@@ -239,16 +164,13 @@ document.querySelectorAll(".count-btn").forEach(btn => {
     };
 });
 
-// 出題（スタート）ボタンを押したときの処理
+// パズルをはじめる（出題）ボタン
 document.getElementById("start-button").onclick = () => {
     if (selectedKanji.length === 0) {
         return alert("漢字をえらんでね！");
     }
     
-    // 【最重要修正】選んだ漢字をシャッフル
     let shuffled = [...selectedKanji].sort(() => Math.random() - 0.5);
-    
-    // 設定された問題数（5問、10問など）と、実際に選んだ漢字の数の、小さい方を基準にして正しく切り出す（エラー防止）
     let actualCount = Math.min(questionCount, shuffled.length);
     questionList = shuffled.slice(0, actualCount);
     
@@ -274,7 +196,6 @@ function createGrid() {
 function isEmptyCanvas(canvas) {
     const ctx = canvas.getContext("2d");
     const img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
     for (let i = 3; i < img.length; i += 4) {
         if (img[i] !== 0) return false;
     }
@@ -308,10 +229,8 @@ function splitKanji(kanji) {
             if (empty) {
                 pctx.fillStyle = "rgba(0,0,0,0.08)";
                 pctx.fillRect(0, 0, size, size);
-
                 pctx.strokeStyle = "rgba(0,0,0,0.25)";
                 pctx.strokeRect(0, 0, size, size);
-
                 part.dataset.empty = "true";
             }
 
@@ -363,7 +282,6 @@ function enableDrag(el) {
 
         el.style.position = "fixed";
         el.style.zIndex = 1000;
-        
         el.style.left = (e.clientX - offsetX) + "px";
         el.style.top = (e.clientY - offsetY) + "px";
     });
@@ -417,7 +335,6 @@ function snap(el) {
         el.style.position = "absolute";
         el.style.left = (cellRect.left - containerRect.left) + "px";
         el.style.top = (cellRect.top - containerRect.top) + "px";
-        
         el.style.width = cellRect.width + "px";
         el.style.height = cellRect.height + "px";
 
@@ -427,7 +344,6 @@ function snap(el) {
         el.style.position = "relative";
         el.style.left = "0";
         el.style.top = "0";
-        
         el.style.width = "";
         el.style.height = "";
 
@@ -440,12 +356,9 @@ function snap(el) {
 
 function checkAnswer() {
     const pieces = document.querySelectorAll(".piece");
-
     const allCorrect = Array.from(pieces).every(p => {
         if (p.dropIndex === undefined) return false;
-
         if (p.puzzleData.isEmpty) return true;
-
         return p.dropIndex === p.puzzleData.correctIndex;
     });
 
