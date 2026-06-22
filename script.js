@@ -34,7 +34,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
         const termSelect = document.getElementById("term-select");
         
         termArea.style.display = "block";
-        termSelect.innerHTML = ""; // ボタンを一旦クリア
+        termSelect.innerHTML = ""; // 学年が変わるときはステップ②のボタンをリセット
         selectedTerm = null;
 
         // 小学校（1~6）と中学校（7）でステップ②のボタンを切り替える
@@ -60,7 +60,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
             });
         }
         
-        // 学年を切り替えたら、現在下に表示されている漢字エリアや選択データも一度リセットする
+        // 【重要】別の学年ボタンを押した時は、完全に最初から選び直すために下の漢字リストと選択データをリセットする
         document.getElementById("kanji-sections").innerHTML = "";
         document.getElementById("kanji-container").style.display = "none";
         document.getElementById("start-button").style.display = "none";
@@ -70,21 +70,38 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
 
 // ② 学期・行ボタンがクリックされた時の共通処理
 function handleTermClick(btn, termValue) {
-    const parent = document.getElementById("term-select");
-    parent.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
-    
-    btn.classList.add("active");
-    
     selectedTerm = termValue;
-    addKanjiSection();
+    
+    const existingId = `section-${selectedGrade}-${selectedTerm}`;
+    const targetSection = document.getElementById(existingId);
+
+    if (targetSection) {
+        // 【またぎ選択対応】すでに画面に出ているグループのボタンをもう一度押した場合は、そのグループを消す（トグル動作）
+        btn.classList.remove("active");
+        
+        // 選択中データ（selectedKanji）から、このグループの漢字をすべて削除
+        const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
+        filtered.forEach(k => {
+            selectedKanji = selectedKanji.filter(x => x !== k);
+        });
+        
+        targetSection.remove();
+        
+        // もし画面に漢字リストが一つもなくなったら、エリアごと非表示にする
+        const container = document.getElementById("kanji-sections");
+        if (container.children.length === 0) {
+            document.getElementById("kanji-container").style.display = "none";
+            document.getElementById("start-button").style.display = "none";
+        }
+    } else {
+        // まだ画面に出ていないグループなら、ボタンをオレンジにしてリストを追加する
+        btn.classList.add("active");
+        addKanjiSection();
+    }
 }
 
 function addKanjiSection() {
     const container = document.getElementById("kanji-sections");
-    
-    // 【修正ポイント】切り替え時にバグが起きないよう、以前の表示（他の学期や行）を一旦クリアする
-    container.innerHTML = "";
-    
     document.getElementById("kanji-container").style.display = "block";
     document.getElementById("start-button").style.display = "inline-block";
 
@@ -99,6 +116,7 @@ function addKanjiSection() {
 
     const section = document.createElement("div");
     section.id = existingId;
+    section.style.marginBottom = "30px"; // グループごとの隙間を作って見やすくする
     
     const heading = document.createElement("div");
     heading.className = "term-heading";
@@ -121,7 +139,7 @@ function addKanjiSection() {
         titleSpan.innerHTML = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
     }
     
-    // 右側に配置する「この学期をぜんぶえらぶ」ボタン
+    // 右側に配置する「ぜんぶえらぶ」ボタン
     const allBtn = document.createElement("button");
     allBtn.textContent = selectedGrade === 7 ? "この行をぜんぶえらぶ" : "この学期をぜんぶえらぶ";
     allBtn.style.fontSize = "12px";
@@ -139,11 +157,6 @@ function addKanjiSection() {
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
         
-        // すでに選択中（キープされている）漢字なら選択状態を再現する
-        if (selectedKanji.includes(k)) {
-            btn.classList.add("selected");
-        }
-        
         btn.onclick = () => {
             btn.classList.toggle("selected");
             if (selectedKanji.includes(k)) {
@@ -157,6 +170,7 @@ function addKanjiSection() {
         sectionButtons.push({ element: btn, data: k });
     });
 
+    // 「ぜんぶえらぶ」を押したときの処理
     allBtn.onclick = () => {
         sectionButtons.forEach(item => {
             if (!item.element.classList.contains("selected")) {
@@ -166,20 +180,22 @@ function addKanjiSection() {
         });
     };
 
+    // 個別の「リストをリセット」を押したときの処理
     clearBtn.onclick = () => {
         filtered.forEach(k => {
             selectedKanji = selectedKanji.filter(x => x !== k);
         });
         section.remove();
         
+        // 対応するステップ②のボタンのオレンジ色（active）を消す
+        const parent = document.getElementById("term-select");
+        const termBtn = parent.querySelector(`.term-btn[data-term="${selectedTerm}"]`);
+        if (termBtn) termBtn.classList.remove("active");
+        
         if (container.children.length === 0) {
             document.getElementById("kanji-container").style.display = "none";
             document.getElementById("start-button").style.display = "none";
         }
-        
-        // ステップ②の選択状態のオレンジ色も消す
-        const parent = document.getElementById("term-select");
-        parent.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
     };
 
     heading.appendChild(clearBtn);
