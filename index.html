@@ -27,9 +27,8 @@
     </div>
 
     <div id="term-area" class="select-block" style="display:none;">
-        <label>② 何学期？（えらぶと下にかんじが出るよ）</label>
-        <div id="term-select">
-            </div>
+        <label id="term-label">② 何学期？（えらぶと下にかんじが出るよ）</label>
+        <div id="term-select"></div>
     </div>
 
     <div id="kanji-container" class="select-block" style="display:none;">
@@ -66,9 +65,14 @@
         <div id="parts-area"></div>
     </div>
 
-    <button id="next-button" style="margin-top:20px; background:#4CAF50; color:white; font-weight:bold; display:none; padding:15px 50px; font-size:22px;">
-        つぎの問題へ
-    </button>
+    <div style="margin-top:20px; display:flex; justify-content:center; align-items:center; gap:20px; position:relative; max-width:700px; margin:20px auto;">
+        <button id="back-to-home-btn" style="background:#ef5350; color:white; font-weight:bold; padding:12px 25px; font-size:16px;">
+            かんじを選びなおす
+        </button>
+        <button id="next-button" style="display:none; background:#4CAF50; color:white; font-weight:bold; padding:15px 50px; font-size:22px;">
+            つぎのもんだいへ
+        </button>
+    </div>
 </div>
 
 <script src="data.js"></script>
