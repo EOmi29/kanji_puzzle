@@ -28,72 +28,95 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 
 /* 漢字リストの見出し */
 .term-heading {
-    text-align: left;
-    max-width: 800px;
-    margin: 20px auto 10px;
-    padding-left: 10px;
-    border-left: 5px solid #FFB74D;
-    font-weight: bold;
-    color: #555;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    max-width: 530px;
+    margin: 20px auto 10px;
+    padding: 5px 10px;
+    font-weight: bold;
+    color: #444;
+    border-left: 5px solid #FFB74D;
 }
 
-/* 漢字のボタン */
+/* 一括選択・解除ボタンの小サイズ化 */
+.select-toggle-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #e6b87d;
+    box-shadow: 0 2px 0 #e6b87d;
+}
+
+/* ② 漢字リストの並び（横最大8列・レスポンシブ） */
+.kanji-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+    max-width: 500px; /* 55px強 × 8列 ≒ 約460px〜500pxに収める */
+    margin: 0 auto;
+    gap: 8px;
+    justify-content: center;
+    background: #fff;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
 .kanji-btn {
-    font-size: 32px;
-    width: 64px;
-    height: 64px;
-    background: white;
+    width: 55px;
+    height: 55px;
+    padding: 0;
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+    background: #FFF;
     border: 2px solid #FFD59E;
     border-radius: 12px;
-    box-shadow: 0 4px 0 #FFD59E;
-    display: inline-flex;
+    box-shadow: 0 3px 0 #FFD59E;
+    display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
-    padding: 0;
-    vertical-align: middle;
 }
-.kanji-btn.selected { 
-    background: #FFB74D; 
-    color: white; 
-    box-shadow: 0 4px 0 #d99a3d; 
-    border-color: #FFB74D;
+.kanji-btn.selected {
+    background: #FF9800;
+    border-color: #E65100;
+    color: white;
+    box-shadow: 0 3px 0 #E65100;
 }
 
-.kanji-list-row {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 12px; max-width: 800px; margin: 0 auto;
-}
-
-/* パズル画面：中央に寄せる調整 */
+/* パズル画面のレイアウト */
 #main-puzzle-layout {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    margin: 10px auto;
+    gap: 30px;
+    margin-top: 20px;
 }
+
 .vertical-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
     writing-mode: vertical-rl;
     text-orientation: upright;
-    font-weight: bold;
-    min-width: 60px;
-    height: 450px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    letter-spacing: 4px;
+    min-width: 40px;
 }
-/* 読みと熟語のフォントサイズと色の調整 */
-#reading { font-size: 44px; color: #d35400; }
-#words { font-size: 26px; color: #444; background: rgba(255,255,255,0.5); border-radius: 10px; }
 
-#grid-container { position: relative; width: 450px; height: 450px; }
+#grid-container {
+    position: relative;
+    width: 450px;
+    height: 450px;
+    background: #FFD59E;
+    padding: 10px;
+    border-radius: 25px;
+    box-sizing: border-box;
+}
 #grid {
-    width: 100%; height: 100%; display: grid; gap: 8px;
-    background: #FFD59E; padding: 10px; border-radius: 25px; box-sizing: border-box;
+    display: grid;
+    width: 100%;
+    height: 100%;
 }
 .grid-cell { background: white; border-radius: 15px; }
 
@@ -110,34 +133,19 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 }
 #parts-area { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
 
+/* ④ 出来損ないを直すパーツサイズ設定（ scale 縮小の廃止） */
 .piece { touch-action: none; z-index: 10; }
-.piece-small { transform: scale(0.6); }
-.piece-large { transform: scale(1); }
+/* パーツ置き場にいる時のみ、認識しやすいよう枠線をつける */
+#parts-area .piece {
+    border: 2px solid #e6b87d;
+    border-radius: 10px;
+    background: white;
+}
 
-/* ボタンが折り返して綺麗に並ぶようにする設定 */
 #term-select {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     max-width: 700px;
     margin: 0 auto;
-    gap: 2px;
-}
-
-/* ================================================== */
-/* 学年ボタンと学期ボタンの色の統一（!important） */
-/* ================================================== */
-.grade-btn, .term-btn {
-    background: #FFD59E !important;
-    color: #444 !important;
-    box-shadow: 0 4px 0 #e6b87d !important;
-}
-.grade-btn.active, .term-btn.active {
-    background: #FFB74D !important;
-    color: white !important;
-    box-shadow: 0 4px 0 #d99a3d !important;
-}
-.grade-btn:active, .term-btn:active {
-    transform: translateY(2px) !important;
-    box-shadow: 0 2px 0 #e6b87d !important;
 }
