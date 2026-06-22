@@ -1,6 +1,6 @@
 let selectedGrade = null;
 let selectedTerm = null;
-let selectedKanji = [];
+let selectedKanji = []; // 他の学年に移ってもここにお気に入りの漢字が保持され続けます
 let gridSize = 2;
 let questionCount = 5;
 let currentQuestion = 0;
@@ -37,6 +37,12 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
                 tBtn.className = "term-btn";
                 tBtn.textContent = rowName;
                 tBtn.dataset.term = idx + 1;
+                
+                // 【改良ポイント】もしこの行の漢字がすでに選ばれていたら、学期・行ボタンを最初からアクティブ(オレンジ)にする
+                const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === (idx + 1));
+                const isAnySelected = filtered.some(k => selectedKanji.some(x => x.kanji === k.kanji));
+                if (isAnySelected) tBtn.classList.add("active");
+
                 tBtn.onclick = () => handleTermClick(tBtn, idx + 1);
                 termSelect.appendChild(tBtn);
             });
@@ -52,16 +58,34 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
                 tBtn.className = "term-btn";
                 tBtn.textContent = `${num}学期`;
                 tBtn.dataset.term = num;
+                
+                // 【改良ポイント】もしこの学期の漢字がすでに選ばれていたら、学期ボタンを最初からアクティブ(オレンジ)にする
+                const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === num);
+                const isAnySelected = filtered.some(k => selectedKanji.some(x => x.kanji === k.kanji));
+                if (isAnySelected) tBtn.classList.add("active");
+
                 tBtn.onclick = () => handleTermClick(tBtn, num);
                 termSelect.appendChild(tBtn);
             });
         }
         
-        // クリア処理
+        // 【改良ポイント】学年を切り替えた時は、下の漢字エリアを一度クリアして、現在アクティブな学期・行のリストだけを再描画する
         document.getElementById("kanji-sections").innerHTML = "";
-        document.getElementById("kanji-container").style.display = "none";
-        document.getElementById("start-button").style.display = "none";
-        selectedKanji = [];
+        
+        // すでに選ばれている漢字が全体で1つ以上あれば、コンテナとスタートボタンは表示状態にする
+        if (selectedKanji.length > 0) {
+            document.getElementById("kanji-container").style.display = "block";
+            document.getElementById("start-button").style.display = "inline-block";
+            
+            // 現在新しく選んだ学年の中で、すでにアクティブ（選択中）になっているグループのリストを自動で表示させる
+            termSelect.querySelectorAll(".term-btn.active").forEach(activeBtn => {
+                selectedTerm = parseInt(activeBtn.dataset.term);
+                addKanjiSection();
+            });
+        } else {
+            document.getElementById("kanji-container").style.display = "none";
+            document.getElementById("start-button").style.display = "none";
+        }
     };
 });
 
@@ -79,8 +103,7 @@ function handleTermClick(btn, termValue) {
         });
         targetSection.remove();
         
-        const container = document.getElementById("kanji-sections");
-        if (container.children.length === 0) {
+        if (selectedKanji.length === 0) {
             document.getElementById("kanji-container").style.display = "none";
             document.getElementById("start-button").style.display = "none";
         }
@@ -97,6 +120,10 @@ function addKanjiSection() {
     document.getElementById("start-button").style.display = "inline-block";
 
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
+    
+    // すでに描画済みならスキップ
+    if (document.getElementById(existingId)) return;
+
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
     
     if (filtered.length === 0) {
@@ -120,7 +147,7 @@ function addKanjiSection() {
     }
     heading.appendChild(titleSpan);
 
-    // ① まとめて選択/解除ボタンの復活
+    // まとめて選択/解除ボタン
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "select-toggle-btn";
     toggleBtn.textContent = "すべてえらぶ";
@@ -129,14 +156,12 @@ function addKanjiSection() {
         const allSelected = Array.from(rowButtons).every(b => b.classList.contains("selected"));
         
         if (allSelected) {
-            // すべて解除
             rowButtons.forEach(b => b.classList.remove("selected"));
             filtered.forEach(k => {
                 selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
             });
             toggleBtn.textContent = "すべてえらぶ";
         } else {
-            // すべて選択
             rowButtons.forEach(b => b.classList.add("selected"));
             filtered.forEach(k => {
                 if (!selectedKanji.some(x => x.kanji === k.kanji)) {
@@ -148,7 +173,7 @@ function addKanjiSection() {
     };
     heading.appendChild(toggleBtn);
     
-    // ② 漢字を並べるグリッド行（CSS側で最大8列制限）
+    // 漢字を並べるグリッド行
     const row = document.createElement("div");
     row.className = "kanji-row";
 
@@ -170,7 +195,6 @@ function addKanjiSection() {
                 selectedKanji.push(k);
             }
             
-            // まとめて選択ボタンのテキスト更新
             const currentRows = row.querySelectorAll(".kanji-btn");
             const isAll = Array.from(currentRows).every(b => b.classList.contains("selected"));
             toggleBtn.textContent = isAll ? "はずす" : "すべてえらぶ";
@@ -178,7 +202,6 @@ function addKanjiSection() {
         row.appendChild(btn);
     });
 
-    // 初期状態に応じたテキスト調整
     const isAllInit = filtered.every(k => selectedKanji.some(x => x.kanji === k.kanji));
     if (isAllInit && filtered.length > 0) toggleBtn.textContent = "はずす";
 
@@ -223,7 +246,7 @@ document.getElementById("start-button").onclick = () => {
     loadQuestion();
 };
 
-// ⑤ 「えらびなおす」ボタン（トップページに戻る）の動作実装
+// 「えらびなおす」ボタン（トップページに戻る）
 document.getElementById("back-to-home-btn").onclick = () => {
     document.getElementById("puzzle-screen").style.display = "none";
     document.getElementById("home-screen").style.display = "block";
@@ -251,7 +274,6 @@ function isEmptyCanvas(canvas) {
     return true;
 }
 
-// ④ ピースが縮小して出来損ないになるバグの解消ロジック
 function splitKanji(kanji) {
     const size = baseSize / gridSize;
     const pieces = [];
@@ -305,7 +327,6 @@ function loadQuestion() {
     pieces.sort(() => Math.random() - 0.5).forEach(p => {
         const cvs = p.canvas;
         cvs.className = "piece";
-        // 最初（パーツ置き場）の大きさを指定
         cvs.style.width = `${cellSize}px`;
         cvs.style.height = `${cellSize}px`;
         cvs.puzzleData = p;
