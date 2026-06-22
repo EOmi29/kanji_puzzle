@@ -51,13 +51,27 @@ function addKanjiSection() {
     
     const heading = document.createElement("div");
     heading.className = "term-heading";
-    heading.innerHTML = `<span>＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞</span>`;
     
+    // 【修正ポイント】左側に配置する個別の「リストをリセット」ボタンを作成
+    const clearBtn = document.createElement("button");
+    clearBtn.textContent = "リストをリセット";
+    clearBtn.style.fontSize = "12px";
+    clearBtn.style.padding = "5px 10px";
+    clearBtn.style.background = "#ef5350"; // 元のスタイルに合わせた赤色
+    clearBtn.style.color = "white";
+    clearBtn.style.margin = "0";
+    
+    // 中央のテキスト（何年生 何学期）
+    const titleSpan = document.createElement("span");
+    titleSpan.innerHTML = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
+    
+    // 右側に配置する「この学期をぜんぶえらぶ」ボタン
     const allBtn = document.createElement("button");
     allBtn.textContent = "この学期をぜんぶえらぶ";
     allBtn.style.fontSize = "12px";
     allBtn.style.padding = "5px 10px";
     allBtn.style.background = "#81D4FA";
+    allBtn.style.margin = "0";
     
     const row = document.createElement("div");
     row.className = "kanji-list-row";
@@ -82,6 +96,7 @@ function addKanjiSection() {
         sectionButtons.push({ element: btn, data: k });
     });
 
+    // 「ぜんぶえらぶ」ボタンの動作設定
     allBtn.onclick = () => {
         sectionButtons.forEach(item => {
             if (!item.element.classList.contains("selected")) {
@@ -91,18 +106,41 @@ function addKanjiSection() {
         });
     };
 
+    // 【修正ポイント】左側のリセットボタンを押したときの動作（その学期エリアごと消去）
+    clearBtn.onclick = () => {
+        // この学期の選択されていた漢字データを配列から取り除く
+        filtered.forEach(k => {
+            selectedKanji = selectedKanji.filter(x => x !== k);
+        });
+        // この学年のセクション自体を画面から削除
+        section.remove();
+        
+        // もし追加されているセクションが一つもなくなったら、エリア全体を非表示にする
+        if (container.children.length === 0) {
+            document.getElementById("kanji-container").style.display = "none";
+            document.getElementById("start-button").style.display = "none";
+        }
+    };
+
+    // 見出しの中に【左：リセット、中央：タイトル、右：ぜんぶえらぶ】の順番で並べる
+    heading.appendChild(clearBtn);
+    heading.appendChild(titleSpan);
     heading.appendChild(allBtn);
+    
     section.appendChild(heading);
     section.appendChild(row);
     container.appendChild(section);
 }
 
-document.getElementById("clear-all-btn").onclick = () => {
-    document.getElementById("kanji-sections").innerHTML = "";
-    selectedKanji = [];
-    document.getElementById("kanji-container").style.display = "none";
-    document.getElementById("start-button").style.display = "none";
-};
+// 画面下部に残っている元の全体リセットボタンの動作設定（念のため残しています）
+if (document.getElementById("clear-all-btn")) {
+    document.getElementById("clear-all-btn").onclick = () => {
+        document.getElementById("kanji-sections").innerHTML = "";
+        selectedKanji = [];
+        document.getElementById("kanji-container").style.display = "none";
+        document.getElementById("start-button").style.display = "none";
+    };
+}
 
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
@@ -228,7 +266,6 @@ function enableDrag(el) {
         dragging = true;
         el.setPointerCapture(e.pointerId);
         
-        // タップした位置とパーツの左上との距離（オフセット）を計算・保持
         const rect = el.getBoundingClientRect();
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
@@ -290,7 +327,6 @@ function snap(el) {
         el.style.left = (cellRect.left - containerRect.left) + "px";
         el.style.top = (cellRect.top - containerRect.top) + "px";
         
-        // マスのサイズにぴったり合わせる
         el.style.width = cellRect.width + "px";
         el.style.height = cellRect.height + "px";
 
@@ -301,7 +337,6 @@ function snap(el) {
         el.style.left = "0";
         el.style.top = "0";
         
-        // パーツ置き場に戻すときはサイズ指定をリセット
         el.style.width = "";
         el.style.height = "";
 
