@@ -17,27 +17,42 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
         
         const termArea = document.getElementById("term-area");
         const termSelect = document.getElementById("term-select");
+        const termLabel = termArea.querySelector("label");
         
         termArea.style.display = "block";
-        termSelect.innerHTML = ""; // 学年が変わるときは一度ボタンをクリア
+        termSelect.innerHTML = ""; // 一度ボタンをクリア
         selectedTerm = null;
 
-        // 【修正ポイント】1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を動的に生成
-        let termsToShow = [1, 2, 3];
-        if (selectedGrade === 1) {
-            termsToShow = [2, 3];
+        if (selectedGrade === 7) {
+            // 中学生の場合は「あ行〜わ行」を生成（term 1〜9）
+            termLabel.textContent = "② 何行？（えらぶと下にかんじが出るよ）";
+            const rowNames = ["あ・か行", "さ・た行", "な・は行", "ま・や行", "ら・わ行", "その他1", "その他2", "その他3", "その他4"];
+            for (let i = 1; i <= 9; i++) {
+                const tBtn = document.createElement("button");
+                tBtn.className = "term-btn";
+                tBtn.textContent = rowNames[i - 1];
+                tBtn.dataset.term = i;
+                tBtn.onclick = () => handleTermClick(tBtn, i);
+                termSelect.appendChild(tBtn);
+            }
+        } else {
+            // 小学生の場合は「学期」を生成
+            termLabel.textContent = "② 何学期？（えらぶと下にかんじが出るよ）";
+            let termsToShow = [1, 2, 3];
+            if (selectedGrade === 1) {
+                termsToShow = [2, 3]; // 1年生は2学期と3学期のみ
+            }
+            termsToShow.forEach(num => {
+                const tBtn = document.createElement("button");
+                tBtn.className = "term-btn";
+                tBtn.textContent = `${num}学期`;
+                tBtn.dataset.term = num;
+                tBtn.onclick = () => handleTermClick(tBtn, num);
+                termSelect.appendChild(tBtn);
+            });
         }
-
-        termsToShow.forEach(num => {
-            const tBtn = document.createElement("button");
-            tBtn.className = "term-btn";
-            tBtn.textContent = `${num}学期`;
-            tBtn.dataset.term = num;
-            tBtn.onclick = () => handleTermClick(tBtn, num);
-            termSelect.appendChild(tBtn);
-        });
         
-        // 学年を変えたら下の漢字選択エリアやスタートボタンは一度リセット
+        // リセット処理
         document.getElementById("kanji-sections").innerHTML = "";
         document.getElementById("kanji-container").style.display = "none";
         document.getElementById("start-button").style.display = "none";
@@ -45,22 +60,19 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
     };
 });
 
-// ② 学期ボタンがクリックされた時の処理
+// ② 学期・行ボタンがクリックされた時の処理
 function handleTermClick(btn, termValue) {
     selectedTerm = termValue;
-    
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
     const targetSection = document.getElementById(existingId);
 
     if (targetSection) {
-        // すでに画面に出ているグループのボタンをもう一度押した場合は消す（トグル動作）
+        // すでに選択されて表示中なら、もう一度押されたら消す
         btn.classList.remove("active");
-        
         const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
         filtered.forEach(k => {
             selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
         });
-        
         targetSection.remove();
         
         const container = document.getElementById("kanji-sections");
@@ -69,7 +81,7 @@ function handleTermClick(btn, termValue) {
             document.getElementById("start-button").style.display = "none";
         }
     } else {
-        // まだ画面に出ていないグループなら追加
+        // 新しく表示する
         btn.classList.add("active");
         addKanjiSection();
     }
@@ -82,8 +94,8 @@ function addKanjiSection() {
     document.getElementById("start-button").style.display = "inline-block";
 
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
-
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
+    
     if (filtered.length === 0) {
         alert("データがありません");
         return;
@@ -91,19 +103,21 @@ function addKanjiSection() {
 
     const section = document.createElement("div");
     section.id = existingId;
-    section.style.marginBottom = "20px";
+    section.className = "term-section";
     
     const heading = document.createElement("div");
-    heading.style.fontWeight = "bold";
-    heading.style.marginBottom = "5px";
-    heading.style.fontSize = "16px";
-    heading.style.textAlign = "left";
-    heading.textContent = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
+    heading.className = "term-heading";
+    if (selectedGrade === 7) {
+        const rowNames = ["あ・か行", "さ・た行", "な・は行", "ま・や行", "ら・わ行", "その他1", "その他2", "その他3", "その他4"];
+        heading.textContent = `＜ 中学生 ${rowNames[selectedTerm - 1]} ＞`;
+    } else {
+        heading.textContent = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
+    }
     
     const row = document.createElement("div");
-    // 元のCSSデザインの邪魔をしないように、ボタンが綺麗に並ぶ最低限のスタイル
     row.style.display = "flex";
     row.style.flexWrap = "wrap";
+    row.style.justifyContent = "center";
     row.style.gap = "5px";
 
     filtered.forEach(k => {
@@ -111,7 +125,6 @@ function addKanjiSection() {
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
         
-        // 以前選んだ状態が残っていればオレンジにする
         if (selectedKanji.some(x => x.kanji === k.kanji)) {
             btn.classList.add("selected");
         }
@@ -125,7 +138,6 @@ function addKanjiSection() {
                 selectedKanji.push(k);
             }
         };
-        
         row.appendChild(btn);
     });
 
@@ -134,7 +146,7 @@ function addKanjiSection() {
     container.appendChild(section);
 }
 
-// 元からHTMLにある「リストをリセット」ボタンの処理
+// リストをリセットボタン
 const clearAllBtn = document.getElementById("clear-all-btn");
 if (clearAllBtn) {
     clearAllBtn.onclick = () => {
@@ -146,7 +158,7 @@ if (clearAllBtn) {
     };
 }
 
-// 分割数（マス）ボタン
+// 分割数ボタン
 document.querySelectorAll(".split-btn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".split-btn").forEach(b => b.classList.remove("active"));
@@ -164,7 +176,7 @@ document.querySelectorAll(".count-btn").forEach(btn => {
     };
 });
 
-// パズルをはじめる（出題）ボタン
+// パズルをはじめる
 document.getElementById("start-button").onclick = () => {
     if (selectedKanji.length === 0) {
         return alert("漢字をえらんでね！");
@@ -227,9 +239,9 @@ function splitKanji(kanji) {
             const empty = isEmptyCanvas(part);
 
             if (empty) {
-                pctx.fillStyle = "rgba(0,0,0,0.08)";
+                pctx.fillStyle = "rgba(0,0,0,0.04)";
                 pctx.fillRect(0, 0, size, size);
-                pctx.strokeStyle = "rgba(0,0,0,0.25)";
+                pctx.strokeStyle = "rgba(0,0,0,0.15)";
                 pctx.strokeRect(0, 0, size, size);
                 part.dataset.empty = "true";
             }
@@ -316,10 +328,7 @@ function snap(el) {
             x: r.left + r.width / 2,
             y: r.top + r.height / 2
         };
-        const d = Math.sqrt(
-            (elCenter.x - cCenter.x) ** 2 +
-            (elCenter.y - cCenter.y) ** 2
-        );
+        const d = Math.sqrt((elCenter.x - cCenter.x) ** 2 + (elCenter.y - cCenter.y) ** 2);
         if (d < minDistance) {
             minDistance = d;
             bestIndex = i;
