@@ -51,7 +51,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
         } else {
             termLabel.textContent = "② 何学期？（えらぶと下にかんじが出るよ）";
             
-            // 【修正ポイント】1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を生成する
+            // 1年生のときは「2学期・3学期」のみ、それ以外は「1〜3学期」を生成する
             let termsToShow = [1, 2, 3];
             if (selectedGrade === 1) {
                 termsToShow = [2, 3];
@@ -89,7 +89,7 @@ function handleTermClick(btn, termValue) {
         // 選択中データ（selectedKanji）から、このグループの漢字をすべて削除
         const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
         filtered.forEach(k => {
-            selectedKanji = selectedKanji.filter(x => x !== k);
+            selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
         });
         
         targetSection.remove();
@@ -166,8 +166,10 @@ function addKanjiSection() {
         
         btn.onclick = () => {
             btn.classList.toggle("selected");
-            if (selectedKanji.includes(k)) {
-                selectedKanji = selectedKanji.filter(x => x !== k);
+            // 【修正ポイント】オブジェクトの参照不一致を防ぐため、文字(kanji)で判定して追加・削除を行う
+            const isAlreadySelected = selectedKanji.some(x => x.kanji === k.kanji);
+            if (isAlreadySelected) {
+                selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
             } else {
                 selectedKanji.push(k);
             }
@@ -182,7 +184,10 @@ function addKanjiSection() {
         sectionButtons.forEach(item => {
             if (!item.element.classList.contains("selected")) {
                 item.element.classList.add("selected");
-                selectedKanji.push(item.data);
+                const isAlreadySelected = selectedKanji.some(x => x.kanji === item.data.kanji);
+                if (!isAlreadySelected) {
+                    selectedKanji.push(item.data);
+                }
             }
         });
     };
@@ -190,7 +195,7 @@ function addKanjiSection() {
     // 個別の「リストをリセット」を押したときの処理
     clearBtn.onclick = () => {
         filtered.forEach(k => {
-            selectedKanji = selectedKanji.filter(x => x !== k);
+            selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
         });
         section.remove();
         
