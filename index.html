@@ -250,4 +250,65 @@
 </head>
 <body>
 
-    <h1>漢字パズルク
+    <h1>漢字パズルクイズ</h1>
+
+    <div id="home-screen">
+        <div class="section">
+            <div class="section-label">① なにどしせい？（学年）</div>
+            <button class="grade-btn" data-grade="1">1年生</button>
+            <button class="grade-btn" data-grade="2">2年生</button>
+            <button class="grade-btn" data-grade="3">3年生</button>
+            <button class="grade-btn" data-grade="4">4年生</button>
+            <button class="grade-btn" data-grade="5">5年生</button>
+            <button class="grade-btn" data-grade="6">6年生</button>
+            <button class="grade-btn" data-grade="7">中学生</button>
+        </div>
+
+        <div class="section" id="term-area" style="display: none;">
+            <div class="section-label" id="term-label">② 何学期？</div>
+            <div id="term-select"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-label">③ なんぶんかつ？（パズルの難しさ）</div>
+            <button class="split-btn active" data-size="2">2 × 2 (4分割)</button>
+            <button class="split-btn" data-size="3">3 × 3 (9分割)</button>
+            <button class="split-btn" data-size="4">4 × 4 (16分割)</button>
+        </div>
+
+        <div class="section">
+            <div class="section-label">④ なんもん解く？</div>
+            <button class="count-btn active">5</button>
+            <button class="count-btn">10</button>
+            <button class="count-btn">15</button>
+            <button class="count-btn">20</button>
+        </div>
+
+        <div class="section" id="kanji-container">
+            <div class="section-label">⑤ 出題されるかんじ（えらんでね）</div>
+            <div id="kanji-sections"></div>
+        </div>
+
+        <button id="start-button">パズルをはじめる！</button>
+    </div>
+
+    <div id="puzzle-screen">
+        <div id="game-layout">
+            <div id="grid-container">
+                <div id="grid"></div>
+                <div id="correct-circle"></div>
+            </div>
+            <div id="parts-area"></div>
+        </div>
+
+        <div id="info-area">
+            <div id="reading"></div>
+            <div id="words"></div>
+            <button id="next-button">つぎの問題へ</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
