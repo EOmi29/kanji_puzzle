@@ -59,16 +59,20 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
                 termSelect.appendChild(tBtn);
             });
         }
+        
+        // 学年を切り替えたら、現在下に表示されている漢字エリアや選択データも一度リセットする
+        document.getElementById("kanji-sections").innerHTML = "";
+        document.getElementById("kanji-container").style.display = "none";
+        document.getElementById("start-button").style.display = "none";
+        selectedKanji = [];
     };
 });
 
 // ② 学期・行ボタンがクリックされた時の共通処理
 function handleTermClick(btn, termValue) {
-    // クリックされたボタンと同じエリア（#term-select内）にある他のボタンのactiveを消す
     const parent = document.getElementById("term-select");
     parent.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
     
-    // クリックしたボタンをオレンジ色にする
     btn.classList.add("active");
     
     selectedTerm = termValue;
@@ -77,14 +81,14 @@ function handleTermClick(btn, termValue) {
 
 function addKanjiSection() {
     const container = document.getElementById("kanji-sections");
+    
+    // 【修正ポイント】切り替え時にバグが起きないよう、以前の表示（他の学期や行）を一旦クリアする
+    container.innerHTML = "";
+    
     document.getElementById("kanji-container").style.display = "block";
     document.getElementById("start-button").style.display = "inline-block";
 
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
-    if (document.getElementById(existingId)) {
-        alert("その学年・グループはもう追加されているよ！");
-        return;
-    }
 
     // データベース（kanjiData）から、選択された「学年」と「term」に完全一致するものを探す
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
@@ -117,9 +121,9 @@ function addKanjiSection() {
         titleSpan.innerHTML = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
     }
     
-    // 右側に配置する「ぜんぶえらぶ」ボタン
+    // 右側に配置する「この学期をぜんぶえらぶ」ボタン
     const allBtn = document.createElement("button");
-    allBtn.textContent = "ぜんぶえらぶ";
+    allBtn.textContent = selectedGrade === 7 ? "この行をぜんぶえらぶ" : "この学期をぜんぶえらぶ";
     allBtn.style.fontSize = "12px";
     allBtn.style.padding = "5px 10px";
     allBtn.style.background = "#81D4FA";
@@ -134,6 +138,11 @@ function addKanjiSection() {
         const btn = document.createElement("button");
         btn.className = "kanji-btn";
         btn.textContent = k.kanji;
+        
+        // すでに選択中（キープされている）漢字なら選択状態を再現する
+        if (selectedKanji.includes(k)) {
+            btn.classList.add("selected");
+        }
         
         btn.onclick = () => {
             btn.classList.toggle("selected");
@@ -167,6 +176,10 @@ function addKanjiSection() {
             document.getElementById("kanji-container").style.display = "none";
             document.getElementById("start-button").style.display = "none";
         }
+        
+        // ステップ②の選択状態のオレンジ色も消す
+        const parent = document.getElementById("term-select");
+        parent.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
     };
 
     heading.appendChild(clearBtn);
