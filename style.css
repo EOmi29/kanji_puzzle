@@ -26,7 +26,7 @@ button {
 button:active { transform: translateY(2px); box-shadow: 0 2px 0 #e6b87d; }
 button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; }
 
-/* 漢字リストの見出し */
+/* 漢字リストの見出しエリア */
 .term-heading {
     display: flex;
     justify-content: space-between;
@@ -36,10 +36,24 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
     padding: 5px 10px;
     font-weight: bold;
     color: #444;
-    border-left: 5px solid #FFB74D;
 }
 
-/* 一括選択・解除ボタンの小サイズ化 */
+/* 【新規】リストを個別消去する赤ボタンのスタイル */
+.delete-section-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    background: #ef5350;
+    color: white;
+    box-shadow: 0 2px 0 #c62828;
+    font-weight: bold;
+}
+.delete-section-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #c62828;
+}
+
+/* 一括選択・解除ボタン（右側）のスタイル */
 .select-toggle-btn {
     padding: 6px 12px;
     font-size: 12px;
@@ -53,7 +67,7 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 .kanji-row {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-    max-width: 500px; /* 55px強 × 8列 ≒ 約460px〜500pxに収める */
+    max-width: 500px;
     margin: 0 auto;
     gap: 8px;
     justify-content: center;
@@ -133,9 +147,7 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
 }
 #parts-area { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
 
-/* ④ 出来損ないを直すパーツサイズ設定（ scale 縮小の廃止） */
 .piece { touch-action: none; z-index: 10; }
-/* パーツ置き場にいる時のみ、認識しやすいよう枠線をつける */
 #parts-area .piece {
     border: 2px solid #e6b87d;
     border-radius: 10px;
