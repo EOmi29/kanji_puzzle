@@ -38,7 +38,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
                 tBtn.textContent = rowName;
                 tBtn.dataset.term = idx + 1;
                 
-                // 【改良】すでにこの行のリストが画面（kanji-sections）に存在していればボタンをオレンジにする
+                // すでにこの行のリストが画面（kanji-sections）に存在していればボタンをオレンジにする
                 const existingId = `section-${selectedGrade}-${idx + 1}`;
                 if (document.getElementById(existingId)) {
                     tBtn.classList.add("active");
@@ -60,7 +60,7 @@ document.querySelectorAll(".grade-btn").forEach(btn => {
                 tBtn.textContent = `${num}学期`;
                 tBtn.dataset.term = num;
                 
-                // 【改良】すでにこの学期のリストが画面（kanji-sections）に存在していればボタンをオレンジにする
+                // すでにこの学期のリストが画面（kanji-sections）に存在していればボタンをオレンジにする
                 const existingId = `section-${selectedGrade}-${num}`;
                 if (document.getElementById(existingId)) {
                     tBtn.classList.add("active");
@@ -80,24 +80,32 @@ function handleTermClick(btn, termValue) {
     const targetSection = document.getElementById(existingId);
 
     if (targetSection) {
-        // すでに画面にリストがある状態で、もう一度ボタンが押されたらそのリストを消去する
-        btn.classList.remove("active");
-        const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
-        filtered.forEach(k => {
-            selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
-        });
+        // すでに画面にリストがある状態で、もう一度ボタンが押されたらそのグループを削除
+        removeSectionData(selectedGrade, selectedTerm);
         targetSection.remove();
-        
-        // 全体のリストが空っぽになったらエリアを非表示にする
-        const container = document.getElementById("kanji-sections");
-        if (container.children.length === 0) {
-            document.getElementById("kanji-container").style.display = "none";
-            document.getElementById("start-button").style.display = "none";
-        }
+        btn.classList.remove("active");
+        checkContainerVisibility();
     } else {
-        // 新しい学期・行が押されたら、前の学年のリストは残したまま「追加」する
+        // 新しい学期・行が押されたら追加
         btn.classList.add("active");
         addKanjiSection();
+    }
+}
+
+// 特定の学年・学期の漢字データを一括して選択解除する共通処理
+function removeSectionData(grade, term) {
+    const filtered = kanjiData.filter(k => k.grade === grade && k.term === term);
+    filtered.forEach(k => {
+        selectedKanji = selectedKanji.filter(x => x.kanji !== k.kanji);
+    });
+}
+
+// リストがすべて空になったかチェックして表示を切り替える処理
+function checkContainerVisibility() {
+    const container = document.getElementById("kanji-sections");
+    if (container.children.length === 0) {
+        document.getElementById("kanji-container").style.display = "none";
+        document.getElementById("start-button").style.display = "none";
     }
 }
 
@@ -109,7 +117,6 @@ function addKanjiSection() {
 
     const existingId = `section-${selectedGrade}-${selectedTerm}`;
     
-    // 二重に作られないようにチェック
     if (document.getElementById(existingId)) return;
 
     const filtered = kanjiData.filter(k => k.grade === selectedGrade && k.term === selectedTerm);
@@ -123,26 +130,50 @@ function addKanjiSection() {
     section.id = existingId;
     section.style.marginBottom = "30px";
     
-    // ヘッダー（見出し ＋ まとめて選択ボタン）
+    // スコープを固定するために現在の学年・学期を内側に記憶させておく
+    const sectionGrade = selectedGrade;
+    const sectionTerm = selectedTerm;
+
+    // ヘッダー（左ボタン ＋ 見出し ＋ 右ボタン）
     const heading = document.createElement("div");
     heading.className = "term-heading";
     
+    // 【新規実装】左側：このリストを個別に消去するボタン
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-section-btn";
+    deleteBtn.textContent = "× リストをけす";
+    deleteBtn.onclick = () => {
+        // 1. データからこのグループの選択を解除
+        removeSectionData(sectionGrade, sectionTerm);
+        // 2. 画面からこのリストの塊をごそっと消去
+        section.remove();
+        // 3. もし現在同じ学年の画面を開いていたら、上の該当学期ボタンのオレンジ（active）も連動して消す
+        if (selectedGrade === sectionGrade) {
+            const termButtons = document.querySelectorAll(".term-btn");
+            termButtons.forEach(b => {
+                if (parseInt(b.dataset.term) === sectionTerm) {
+                    b.classList.remove("active");
+                }
+            });
+        }
+        // 4. 全部消えたかチェック
+        checkContainerVisibility();
+    };
+    heading.appendChild(deleteBtn);
+    
+    // 中央：見出しタイトル
     const titleSpan = document.createElement("span");
-    if (selectedGrade === 7) {
-        titleSpan.textContent = `＜ 中学生 ${chungakuRows[selectedTerm - 1]} ＞`;
+    if (sectionGrade === 7) {
+        titleSpan.textContent = `中学生 ${chungakuRows[sectionTerm - 1]}`;
     } else {
-        titleSpan.textContent = `＜ ${selectedGrade}年生 ${selectedTerm}学期 ＞`;
+        titleSpan.textContent = `${sectionGrade}年生 ${sectionTerm}学期`;
     }
     heading.appendChild(titleSpan);
 
-    // まとめて選択/解除ボタン
+    // 右側：まとめて選択/解除ボタン
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "select-toggle-btn";
     toggleBtn.textContent = "すべてえらぶ";
-    
-    // スコープを固定するために現在の学年・学期を記憶させておく
-    const sectionGrade = selectedGrade;
-    const sectionTerm = selectedTerm;
 
     toggleBtn.onclick = () => {
         const rowButtons = row.querySelectorAll(".kanji-btn");
