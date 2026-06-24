@@ -2238,7 +2238,7 @@ const kanjiData = [
     { kanji: "弄", grade: 7, term: 9, reading: "ろう・もてあそ︿ぶ﹀", words: ["翻弄", "愚弄"] },
     { kanji: "郎", grade: 7, term: 9, reading: "ろう", words: ["新郎", "太郎"] },
     { kanji: "浪", grade: 7, term: 9, reading: "ろう・なみ", words: ["波浪警報", "浪費"] },
-    { kanji: "廊", grade: 7, term: 9, reading: "ろう", words: ["ろうか", ""] },
+    { kanji: "廊", grade: 7, term: 9, reading: "ろう", words: ["廊下", ""] },
     { kanji: "楼", grade: 7, term: 9, reading: "ろう", words: ["楼閣", "摩天楼"] },
     { kanji: "漏", grade: 7, term: 9, reading: "ろう・も︿れる﹀", words: ["漏洩", "雨漏り"] },
     { kanji: "籠", grade: 7, term: 9, reading: "ろう・かご", words: ["籠城", "鳥籠"] },
