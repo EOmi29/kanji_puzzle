@@ -154,6 +154,50 @@ button.active { background: #FFB74D; box-shadow: 0 4px 0 #d99a3d; color: white; 
     background: white;
 }
 
+/* 自由入力エリア */
+#free-input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+#free-input {
+    padding: 12px 16px;
+    font-size: 18px;
+    border: 2px solid #FFD59E;
+    border-radius: 15px;
+    font-family: "Noto Sans JP", sans-serif;
+    width: 240px;
+    max-width: 60vw;
+}
+#free-input:focus {
+    outline: none;
+    border-color: #FFB74D;
+}
+#free-add-btn {
+    background: #FFB74D;
+    color: white;
+    font-weight: bold;
+}
+
+/* 自由入力で追加された漢字チップ（クリックで削除） */
+.free-kanji-btn {
+    position: relative;
+}
+.free-kanji-btn::after {
+    content: "×";
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    font-size: 12px;
+    background: #ef5350;
+    color: white;
+    border-radius: 50%;
+}
+
 #term-select {
     display: flex;
     flex-wrap: wrap;

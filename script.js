@@ -85,6 +85,7 @@ function handleTermClick(btn, termValue) {
         targetSection.remove();
         btn.classList.remove("active");
         checkContainerVisibility();
+        renderFreeInputSection(); // 自由入力チップとの選択状態を同期
     } else {
         // 新しい学期・行が押されたら追加
         btn.classList.add("active");
@@ -158,6 +159,7 @@ function addKanjiSection() {
         }
         // 4. 全部消えたかチェック
         checkContainerVisibility();
+        renderFreeInputSection(); // 自由入力チップとの選択状態を同期
     };
     heading.appendChild(deleteBtn);
     
@@ -194,6 +196,7 @@ function addKanjiSection() {
             });
             toggleBtn.textContent = "はずす";
         }
+        renderFreeInputSection(); // 自由入力チップとの選択状態を同期
     };
     heading.appendChild(toggleBtn);
     
@@ -222,6 +225,8 @@ function addKanjiSection() {
             const currentRows = row.querySelectorAll(".kanji-btn");
             const isAll = Array.from(currentRows).every(b => b.classList.contains("selected"));
             toggleBtn.textContent = isAll ? "はずす" : "すべてえらぶ";
+
+            renderFreeInputSection(); // 自由入力チップとの選択状態を同期
         };
         row.appendChild(btn);
     });
@@ -242,6 +247,98 @@ document.getElementById("clear-all-btn").onclick = () => {
     document.getElementById("start-button").style.display = "none";
     document.querySelectorAll(".term-btn").forEach(b => b.classList.remove("active"));
 };
+
+// ================== 自由入力機能 ==================
+// 学年・学期が分からなくても、直接文字を打ち込んで出題候補に追加できる機能
+
+// 入力された1文字に対応するデータをkanjiDataから検索（読み・熟語があれば流用する）
+function findKanjiData(char) {
+    return kanjiData.find(k => k.kanji === char);
+}
+
+document.getElementById("free-add-btn").onclick = addFreeInputKanji;
+document.getElementById("free-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addFreeInputKanji();
+});
+
+function addFreeInputKanji() {
+    const input = document.getElementById("free-input");
+    const rawText = input.value.trim();
+    if (!rawText) return;
+
+    // 文字ごとに分解し、空白や重複を除去（例：「秋空栗松」→ [秋,空,栗,松]）
+    const chars = [...new Set(rawText.replace(/\s/g, "").split(""))];
+
+    let addedCount = 0;
+    chars.forEach(char => {
+        // すでに選択済み（学年選択・自由入力どちらでも）ならスキップ
+        if (selectedKanji.some(k => k.kanji === char)) return;
+
+        // データベースにあれば読み・熟語を流用。なければ最低限のデータで作成
+        const found = findKanjiData(char);
+        const kanjiObj = found
+            ? { ...found, viaFreeInput: true }
+            : { kanji: char, grade: null, term: null, reading: "", words: [], viaFreeInput: true };
+
+        selectedKanji.push(kanjiObj);
+        addedCount++;
+    });
+
+    input.value = "";
+    renderFreeInputSection();
+
+    if (addedCount === 0) {
+        alert("その字はすでに選択されています");
+    }
+}
+
+// 自由入力で追加された漢字をチップ表示（クリックで個別にけせる）
+function renderFreeInputSection() {
+    const container = document.getElementById("kanji-sections");
+    const freeChars = selectedKanji.filter(k => k.viaFreeInput);
+    let section = document.getElementById("section-free");
+
+    if (freeChars.length === 0) {
+        if (section) section.remove();
+        checkContainerVisibility();
+        return;
+    }
+
+    document.getElementById("kanji-container").style.display = "block";
+    document.getElementById("start-button").style.display = "inline-block";
+
+    if (!section) {
+        section = document.createElement("div");
+        section.id = "section-free";
+        section.style.marginBottom = "30px";
+        container.insertBefore(section, container.firstChild);
+    }
+    section.innerHTML = "";
+
+    const heading = document.createElement("div");
+    heading.className = "term-heading";
+    const titleSpan = document.createElement("span");
+    titleSpan.textContent = "直接入力した字（クリックでけす）";
+    heading.appendChild(titleSpan);
+    section.appendChild(heading);
+
+    const row = document.createElement("div");
+    row.className = "kanji-row";
+
+    freeChars.forEach(k => {
+        const btn = document.createElement("button");
+        btn.className = "kanji-btn selected free-kanji-btn";
+        btn.textContent = k.kanji;
+        btn.title = "クリックでけす";
+        btn.onclick = () => {
+            selectedKanji = selectedKanji.filter(x => x !== k);
+            renderFreeInputSection();
+        };
+        row.appendChild(btn);
+    });
+
+    section.appendChild(row);
+}
 
 // 分割数・問題数ボタン
 document.querySelectorAll(".split-btn").forEach(btn => {
